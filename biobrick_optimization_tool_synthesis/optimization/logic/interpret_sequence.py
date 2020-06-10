@@ -36,7 +36,12 @@ def determine_sequence_type(sequence: str):
     return INDETERMINATE
 
 
+def clean_sequence(sequence: str):
+    return ("".join(sequence.split())).upper()
+
+
 def turn_sequence_into_amino(sequence: str, sequence_type: str = ''):
+    sequence = clean_sequence(sequence)
     if sequence_type == '':
         sequence_type = determine_sequence_type(sequence)
 
