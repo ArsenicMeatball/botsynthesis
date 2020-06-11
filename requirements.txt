@@ -1,3 +1,4 @@
+python_codon_tables
 django
 biopython == 1.77
 coverage == 5.1
