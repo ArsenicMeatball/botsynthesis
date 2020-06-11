@@ -7,7 +7,7 @@
 import python_codon_tables as pct
 
 
-def fetch_codon_table(organism_id) -> dict:
+def fetch_codon_table(organism_id=316407) -> dict:
     """
         grab a dict representing the codon_table w/ codon usage of the organism
         ('amino acid', {'codon' : ratio, ... })\

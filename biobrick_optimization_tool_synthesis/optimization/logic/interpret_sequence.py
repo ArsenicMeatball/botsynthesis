@@ -2,7 +2,6 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio.Data import IUPACData
 
-
 aa_set = set(IUPACData.protein_letters)
 dna_set = set(IUPACData.unambiguous_dna_letters)
 rna_set = set(IUPACData.unambiguous_rna_letters)
@@ -40,7 +39,7 @@ def clean_sequence(sequence: str):
     return ("".join(sequence.split())).upper()
 
 
-def turn_sequence_into_amino(sequence: str, sequence_type: str = ''):
+def turn_string_sequence_into_amino(sequence: str, sequence_type: str = ''):
     sequence = clean_sequence(sequence)
     if sequence_type == '':
         sequence_type = determine_sequence_type(sequence)
