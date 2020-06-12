@@ -6,7 +6,6 @@ from Bio.SeqUtils import GC
 
 
 def eval_host(individual, ancestor_sequence):
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
     return sum(1 for a, b in zip(sequence, ancestor_sequence) if a != b)
 
@@ -15,7 +14,6 @@ def eval_restriction_sites(individual, restrict_sites):
     """
     TODO: Make it remove rest sites
     """
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
     # check unwanted restriction sites
     analysis = Analysis(restrictionbatch=restrict_sites, sequence=sequence)
@@ -28,11 +26,10 @@ def eval_restriction_sites(individual, restrict_sites):
     return score
 
 
-def eval_start_sites(individual, ribosome_binding_sites=RibosomeBindingSites, table_name="Standard"):
+def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
     """
     TODO: Make it remove start sites
     """
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
     codon_table = CodonTable.unambiguous_dna_by_name[table_name]
 
@@ -81,7 +78,6 @@ def eval_start_sites(individual, ribosome_binding_sites=RibosomeBindingSites, ta
 
 
 def eval_repeats(individual, window_size=10):
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
     # iterate across overlapping chunks of complete codons
     codon_window = window_size // 3
@@ -109,7 +105,6 @@ def eval_repeats(individual, window_size=10):
 
 
 def eval_homopolymers(individual, homopolymer_threshold=4):
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
     seq = str(sequence.tomutable())
 
@@ -130,7 +125,6 @@ def eval_homopolymers(individual, homopolymer_threshold=4):
 
 
 def eval_splice_sites(individual):
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
 
     def _pass_back_matches(list_of_sites, curr_dna):
@@ -148,15 +142,15 @@ def eval_splice_sites(individual):
         return codon_bounds
 
     def _get_splice_sites(curr_dna):
-        donor_sites = _pass_back_matches(splice_donors, curr_dna)
-        acceptor_sites = _pass_back_matches(splice_acceptors, curr_dna)
-        return set(donor_sites + acceptor_sites)
+        # donor_sites = _pass_back_matches(splice_donors, curr_dna)
+        # acceptor_sites = _pass_back_matches(splice_acceptors, curr_dna)
+        # return set(donor_sites + acceptor_sites)
+        pass
 
     return len(_get_splice_sites(sequence.tomutable))
 
 
 def eval_gc_content(individual, gc):
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
     window_size = gc.window_size  # tuples are immutable
     # some windows may be expressed as function of the sequence length
@@ -187,7 +181,6 @@ def eval_hairpins(individual, stem_length=10):
     :param stem_length:
     :return:
     """
-    assert isinstance(individual, SequenceContainer)
     sequence = getattr(individual, "sequence")
     mutable_seq = sequence.tomutable()
     score = 0
@@ -201,3 +194,15 @@ def eval_hairpins(individual, stem_length=10):
             if not (math.fabs(hairpin.start() - i) < stem_length or stem_length + 2 < hairpin.end() - hairpin.start()):
                 score += 1
     return score
+
+
+fitness_evals = [
+    eval_host,
+    eval_restriction_sites,
+    eval_start_sites,
+    eval_repeats,
+    eval_homopolymers,
+    eval_splice_sites,
+    eval_gc_content,
+    eval_hairpins
+]
