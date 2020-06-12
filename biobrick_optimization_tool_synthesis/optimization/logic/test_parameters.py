@@ -38,5 +38,6 @@ algorithm_params = {
         'max': 0.9,
         'window_size': 20
     },
+    'generations': 3,
     'restriction_sites': 'EcoRI'
 }
