@@ -1,22 +1,30 @@
-
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
-from biobrick_optimization_tool_synthesis.optimization.logic import test_sequences
+from biobrick_optimization_tool_synthesis.optimization.logic import test_sequences, interpret_sequence
 from biobrick_optimization_tool_synthesis.optimization.logic.set_codon_table import fetch_codon_table
 
+
 def determine_ideal_codon_optimized_sequence(sequence: Seq, codon_usage: dict) -> Seq:
+    """
+        Determine the codon optimized sequence that would be ideal in increase expression in the host
+    :param sequence: (Bio.Seq.Seq) ~ (.alphabet == IUPAC.protein) sequence representing the amino acids to be synthesized
+    :param codon_usage: (dict) represents the codon frequencies for each amino acid for the given host
+    :return: (Bio.Seq.Seq) sequence representing the optimal codon sequence for expression
+    """
     # requires amino acid sequence and a dict mapping amino acids to codons
 
     if sequence.alphabet is not IUPAC.protein:
-        raise Exception("It ain't right alphabet, mus tbe protein")
+        raise Exception("Incorrect alphabet, must be IUPAC.protein")
+
+    codon_optimized_sequence = ""
     for amino_acid in sequence:
-
-
-
-    return sequence
+        codon_optimized_sequence += max(codon_usage[amino_acid], key=lambda key: codon_usage[amino_acid][key])
+    return Seq(codon_optimized_sequence, IUPAC.unambiguous_dna)
 
 
 if __name__ == '__main__':
-    sequence = Seq(test_sequences.valid_protein, IUPAC.protein)
+    sequence = Seq(interpret_sequence.clean_sequence(test_sequences.valid_protein), IUPAC.protein)
     codon_usage = fetch_codon_table()
-    determine_ideal_codon_optimized_sequence(sequence, codon_usage)
+    codon_optimized = determine_ideal_codon_optimized_sequence(sequence, codon_usage)
+    print(codon_usage)
+    print(codon_optimized)
