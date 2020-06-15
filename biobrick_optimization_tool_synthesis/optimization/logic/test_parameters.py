@@ -35,6 +35,7 @@ algorithm_params = {
     'mutation_%': 5,
     'archive_size': 2,
     'crossover_%': 15,
+    'linear':True,
     'gc_parameters': {
         'min': 0.1,
         'max': 0.9,
