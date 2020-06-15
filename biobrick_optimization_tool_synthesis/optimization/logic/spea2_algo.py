@@ -1,4 +1,4 @@
-import multiprocessing
+import multiprocessing as mp
 
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
@@ -14,26 +14,44 @@ from biobrick_optimization_tool_synthesis.optimization.logic.test_parameters imp
 
 def spea2_main_loop(params: dict):
     # create population
-    population = initialize_population(params)
+    params['population'] = initialize_population(params)
     # start loop
     generation = 0
     is_converged = False
-    while generation < params['generations']:
+    out_q = mp.Queue()
+    for generation in range(params['generations']):
         # check end conditions
         if is_converged:
             break
         # multiprocessing check fitness
         processes = []
         for func in fitness_evals:
-            process = multiprocessing.Process(
+            process = mp.Process(
                 target=func,
-                args=tuple([(k, v) for k, v in params.items()])
+                args=(params, out_q)
             )
             processes.append(process)
             process.start()
 
+        # retrieve data
+        result = {}
+        for i in range(len(processes)):
+            result.update(out_q.get())
+
+        # kill processes
+        for p in processes:
+            p.join()
+
+        # update the main data store
+        for eval_type, seq_n_score in result.items():
+            for seq, score in seq_n_score.items():
+                params['population'][seq][eval_type] = score
+
+    for k, v in params['population'].items():
+        print(k, v)
     # domination
     # fitness
+
 
 
 if __name__ == '__main__':

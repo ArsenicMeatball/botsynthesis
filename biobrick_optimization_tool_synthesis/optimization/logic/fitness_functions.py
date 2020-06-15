@@ -1,19 +1,32 @@
 import re
 import math
+import time
+from queue import Queue
+
+from Bio.Alphabet import IUPAC
 from Bio.Data import CodonTable
 from Bio.Restriction import Analysis
+from Bio.Seq import Seq
 from Bio.SeqUtils import GC
 
 
-def eval_host(individual, ancestor_sequence):
-    sequence = getattr(individual, "sequence")
-    return sum(1 for a, b in zip(sequence, ancestor_sequence) if a != b)
+def find_num_differences(sequence1: Seq, sequence2: Seq) -> int:
+    return sum(1 for a, b in zip(sequence1, sequence2) if a != b)
 
+
+def eval_host(params: dict, out_q: Queue):
+    out = {'eval_host': {}}
+    for sequence in params['population'].keys():
+        # convert to seq and send it
+        out['eval_host'][sequence] = find_num_differences(
+            Seq(sequence, IUPAC.unambiguous_dna), params['codon_opt_seq']
+        )
+    out_q.put(out)
+
+
+"""
 
 def eval_restriction_sites(individual, restrict_sites):
-    """
-    TODO: Make it remove rest sites
-    """
     sequence = getattr(individual, "sequence")
     # check unwanted restriction sites
     analysis = Analysis(restrictionbatch=restrict_sites, sequence=sequence)
@@ -27,9 +40,6 @@ def eval_restriction_sites(individual, restrict_sites):
 
 
 def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
-    """
-    TODO: Make it remove start sites
-    """
     sequence = getattr(individual, "sequence")
     codon_table = CodonTable.unambiguous_dna_by_name[table_name]
 
@@ -176,11 +186,6 @@ def eval_gc_content(individual, gc):
 
 
 def eval_hairpins(individual, stem_length=10):
-    """
-    :param individual:
-    :param stem_length:
-    :return:
-    """
     sequence = getattr(individual, "sequence")
     mutable_seq = sequence.tomutable()
     score = 0
@@ -194,15 +199,17 @@ def eval_hairpins(individual, stem_length=10):
             if not (math.fabs(hairpin.start() - i) < stem_length or stem_length + 2 < hairpin.end() - hairpin.start()):
                 score += 1
     return score
-
+"""
 
 fitness_evals = [
-    eval_host,
-    eval_restriction_sites,
-    eval_start_sites,
-    eval_repeats,
-    eval_homopolymers,
-    eval_splice_sites,
-    eval_gc_content,
-    eval_hairpins
+    eval_host
 ]
+"""
+eval_restriction_sites,
+eval_start_sites,
+eval_repeats,
+eval_homopolymers,
+eval_splice_sites,
+eval_gc_content,
+eval_hairpins
+"""
