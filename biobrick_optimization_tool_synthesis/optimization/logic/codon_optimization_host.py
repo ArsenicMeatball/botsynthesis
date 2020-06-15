@@ -1,6 +1,6 @@
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
-from biobrick_optimization_tool_synthesis.optimization.logic import test_parameters, interpret_sequence
+from biobrick_optimization_tool_synthesis.optimization.logic import test_parameters, cleaning
 from biobrick_optimization_tool_synthesis.optimization.logic.set_codon_table import fetch_codon_table
 
 
@@ -23,7 +23,7 @@ def determine_ideal_codon_optimized_sequence(sequence: Seq, codon_usage: dict) -
 
 
 if __name__ == '__main__':
-    sequence = Seq(interpret_sequence.clean_sequence(test_parameters.valid_protein), IUPAC.protein)
+    sequence = Seq(cleaning.clean_sequence(test_parameters.valid_protein), IUPAC.protein)
     codon_usage = fetch_codon_table()
     codon_optimized = determine_ideal_codon_optimized_sequence(sequence, codon_usage)
     print(codon_usage)
