@@ -1,5 +1,5 @@
 from django.test import TestCase
-from biobrick_optimization_tool_synthesis.optimization.logic import interpret_sequence
+from biobrick_optimization_tool_synthesis.optimization.logic import cleaning
 
 
 # Create your tests here.
@@ -19,17 +19,17 @@ class InterpretSequenceCase(TestCase):
 
         unknown = valid_dna.replace('T', 'C')
 
-        self.assertEqual(interpret_sequence.AA, interpret_sequence.determine_sequence_type(valid_protein),
+        self.assertEqual(cleaning.AA, cleaning.determine_sequence_type(valid_protein),
                          'Determine valid protein sequence')
-        self.assertEqual(interpret_sequence.DNA, interpret_sequence.determine_sequence_type(valid_dna),
+        self.assertEqual(cleaning.DNA, cleaning.determine_sequence_type(valid_dna),
                          'Determine valid DNA sequence')
-        self.assertEqual(interpret_sequence.RNA, interpret_sequence.determine_sequence_type(valid_rna),
+        self.assertEqual(cleaning.RNA, cleaning.determine_sequence_type(valid_rna),
                          'Determine valid RNA sequence')
-        self.assertEqual(interpret_sequence.INVALID, interpret_sequence.determine_sequence_type(invalid_protein),
+        self.assertEqual(cleaning.INVALID, cleaning.determine_sequence_type(invalid_protein),
                          'Determine invalid Protein sequence')
-        self.assertEqual(interpret_sequence.INVALID, interpret_sequence.determine_sequence_type(invalid_dna),
+        self.assertEqual(cleaning.INVALID, cleaning.determine_sequence_type(invalid_dna),
                          'Determine invalid DNA sequence')
-        self.assertEqual(interpret_sequence.INVALID, interpret_sequence.determine_sequence_type(invalid_rna),
+        self.assertEqual(cleaning.INVALID, cleaning.determine_sequence_type(invalid_rna),
                          'Determine invalid RNA sequence')
-        self.assertEqual(interpret_sequence.INDETERMINATE, interpret_sequence.determine_sequence_type(unknown),
+        self.assertEqual(cleaning.INDETERMINATE, cleaning.determine_sequence_type(unknown),
                          'Determine unknown sequence')

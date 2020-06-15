@@ -3,7 +3,7 @@ import copy
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
-from biobrick_optimization_tool_synthesis.optimization.logic import interpret_sequence, test_parameters
+from biobrick_optimization_tool_synthesis.optimization.logic import cleaning, test_parameters
 from biobrick_optimization_tool_synthesis.optimization.logic.codon_optimization_host import \
     determine_ideal_codon_optimized_sequence
 from biobrick_optimization_tool_synthesis.optimization.logic.set_codon_table import fetch_codon_table
