@@ -1,3 +1,4 @@
+from Bio import Restriction
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio.Data import IUPACData
@@ -57,3 +58,13 @@ def turn_string_sequence_into_amino(sequence: str, sequence_type: str = ''):
         sequence = Seq(sequence, IUPAC.protein)
 
     return sequence
+
+
+def get_rest_enzymes_from_list(restriction_enzymes: list):
+    return Restriction.RestrictionBatch(
+        [Restriction.AllEnzymes.get(enz) for enz in restriction_enzymes]
+    )
+
+
+def get_rest_enzymes_from_string(restriction_enzymes: str):
+    return get_rest_enzymes_from_list(restriction_enzymes.split())
