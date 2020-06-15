@@ -5,7 +5,7 @@ from queue import Queue
 
 from Bio.Alphabet import IUPAC
 from Bio.Data import CodonTable
-from Bio.Restriction import Analysis
+from Bio.Restriction import Analysis, RestrictionBatch
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
 
@@ -24,20 +24,26 @@ def eval_host(params: dict, out_q: Queue):
     out_q.put(out)
 
 
+def find_restriction_sites(restriction_batch: RestrictionBatch, sequence: Seq, linear=True):
+    return Analysis(restrictionbatch=restriction_batch, sequence=sequence, linear=linear).full()
+
+
+def eval_restriction_sites(params: dict, out_q: Queue):
+    out = {'eval_rest_sites': {}}
+    for sequence in params['population'].keys():
+        rest_sites = find_restriction_sites(
+            params['restriction_sites'],
+            Seq(sequence, IUPAC.unambiguous_dna),
+            params['linear']
+        )
+        score = 0
+        for sites in rest_sites.values():
+            score += len(sites)
+        out['eval_rest_sites'][sequence] = score
+    out_q.put(out)
+
+
 """
-
-def eval_restriction_sites(individual, restrict_sites):
-    sequence = getattr(individual, "sequence")
-    # check unwanted restriction sites
-    analysis = Analysis(restrictionbatch=restrict_sites, sequence=sequence)
-    result = analysis.full()
-    # score the sequence based on the number of restriction sites
-    score = 0
-    for enz, cuts in result.items():
-        for cut in cuts:
-            score += 1
-    return score
-
 
 def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
     sequence = getattr(individual, "sequence")
@@ -202,10 +208,11 @@ def eval_hairpins(individual, stem_length=10):
 """
 
 fitness_evals = [
-    eval_host
+    eval_host,
+    eval_restriction_sites
 ]
 """
-eval_restriction_sites,
+
 eval_start_sites,
 eval_repeats,
 eval_homopolymers,
