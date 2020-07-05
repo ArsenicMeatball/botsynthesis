@@ -9,6 +9,8 @@ from Bio.Restriction import Analysis, RestrictionBatch
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
 
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_manipulation import *
+
 
 def find_num_differences(sequence1: Seq, sequence2: Seq) -> int:
     return sum(1 for a, b in zip(sequence1, sequence2) if a != b)
@@ -42,6 +44,20 @@ def eval_restriction_sites(params: dict, out_q: Queue):
         out['eval_rest_sites'][sequence] = score
     out_q.put(out)
 
+
+def eval_repeats(params: dict, out_q: Queue):
+    out = {'eval_repeats': {}}
+    for sequence in params['population'].keys():
+        if params['locations']:
+            locations = find_repeats(sequence, params['repeat_size'], params['overlapping'])
+            score = [get_number_of_repeats_from_dict(locations), locations]
+        else:
+            if params['overlapping']:
+                score = [find_number_of_overlapping_repeats(sequence, params['repeat_size'])]
+            else:
+                score = [find_number_of_non_overlapping_repeats(sequence, params['repeat_size'])]
+        out['eval_repeats'][sequence] = score
+    out_q.put(out)
 
 """
 
@@ -92,32 +108,6 @@ def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
                 count += 1
     return score
 """
-
-def eval_repeats(individual, window_size=10):
-    sequence = getattr(individual, "sequence")
-    # iterate across overlapping chunks of complete codons
-    codon_window = window_size // 3
-    mutable_seq = sequence.tomutable()
-
-    score = 0
-    # iterate by codon, but map back to sequence-based indices
-    for i in range(len(mutable_seq) // 3 - codon_window + 1):
-        window = slice(
-            i * 3,
-            (i + codon_window) * 3
-            if (i + codon_window) * 3 < len(mutable_seq)
-            else len(mutable_seq),
-        )
-
-        # check if the segment is found in the full sequence
-        non_overlapping_matches = re.findall(
-            str(mutable_seq[window]), str(mutable_seq)
-        )
-
-        if len(non_overlapping_matches) > 1 and len(mutable_seq[window]) > 3:
-            # print(non_overlapping_matches)
-            score += 1
-    return score
 """
 
 def eval_homopolymers(individual, homopolymer_threshold=4):

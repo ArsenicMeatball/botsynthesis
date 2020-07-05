@@ -2,7 +2,8 @@ from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.cleaning import get_rest_enzymes_from_string
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.cleaning import \
+    get_rest_enzymes_from_string
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.codon_optimization_host import \
     determine_ideal_codon_optimized_sequence
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
@@ -42,5 +43,8 @@ algorithm_params = {
         'window_size': 20
     },
     'generations': 3,
-    'restriction_sites': get_rest_enzymes_from_string(restriction_sites)
+    'restriction_sites': get_rest_enzymes_from_string(restriction_sites),
+    'overlapping': True,
+    'locations': True,
+    'repeat_size': 10
 }
