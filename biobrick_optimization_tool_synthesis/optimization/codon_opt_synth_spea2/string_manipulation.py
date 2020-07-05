@@ -1,7 +1,14 @@
 import re
 
 
-def find_number_of_non_overlapping_repeats(string: str, min_repeat_size=10):
+def get_number_of_repeats_from_dict(d: dict) -> int:
+    r = 0
+    for v in d.values():
+        r += len(v)
+    return r - len(d)
+
+
+def find_number_of_non_overlapping_repeats(string: str, min_repeat_size=10) -> int:
     if min_repeat_size < 1:
         raise ArithmeticError("Can't find repeats smaller than 1")
     if len(string) < min_repeat_size:
@@ -16,7 +23,7 @@ def find_number_of_non_overlapping_repeats(string: str, min_repeat_size=10):
     return result
 
 
-def find_number_of_overlapping_repeats(string: str, min_repeat_size=10):
+def find_number_of_overlapping_repeats(string: str, min_repeat_size=10) -> int:
     if min_repeat_size < 1:
         raise ArithmeticError("Can't find repeats smaller than 1")
     if len(string) < min_repeat_size:
@@ -26,7 +33,7 @@ def find_number_of_overlapping_repeats(string: str, min_repeat_size=10):
     return maximum - len(strings_of_size)
 
 
-def find_repeats(string: str, min_repeat_size=10, overlapping=True):
+def find_repeats(string: str, min_repeat_size=10, overlapping=True) -> dict:
     if min_repeat_size < 1:
         raise ArithmeticError("Can't find repeats smaller than 1")
     if len(string) < min_repeat_size:

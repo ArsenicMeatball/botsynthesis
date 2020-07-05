@@ -1,7 +1,7 @@
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
-from biobrick_optimization_tool_synthesis.optimization.logic import test_parameters, cleaning
-from biobrick_optimization_tool_synthesis.optimization.logic.set_codon_table import fetch_codon_table
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import test_parameters, cleaning
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
 
 
 def determine_ideal_codon_optimized_sequence(sequence: Seq, codon_usage: dict) -> Seq:

@@ -1,11 +1,11 @@
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
-from biobrick_optimization_tool_synthesis.optimization.logic import cleaning
-from biobrick_optimization_tool_synthesis.optimization.logic.cleaning import get_rest_enzymes_from_string
-from biobrick_optimization_tool_synthesis.optimization.logic.codon_optimization_host import \
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.cleaning import get_rest_enzymes_from_string
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.codon_optimization_host import \
     determine_ideal_codon_optimized_sequence
-from biobrick_optimization_tool_synthesis.optimization.logic.set_codon_table import fetch_codon_table
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
 
 valid_protein = 'AL*RLEGIGLN ATQACSSTVG DPKDGSVKVT FLVMISKEYP ASEMIFEKSS KDARIKVFGT ' \
                 'HMVILDLHNA GDGPGVIDAR RLNLPTLLQL IAFVKGYKIT QMCQAYKREE QNTWPSIFDA ' \

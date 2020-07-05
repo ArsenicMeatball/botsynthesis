@@ -1,5 +1,5 @@
 from django.test import TestCase
-from biobrick_optimization_tool_synthesis.optimization.logic import cleaning
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning
 
 
 # Create your tests here.

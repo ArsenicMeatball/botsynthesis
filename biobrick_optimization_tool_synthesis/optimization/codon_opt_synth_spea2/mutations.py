@@ -3,11 +3,11 @@ import copy
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
-from biobrick_optimization_tool_synthesis.optimization.logic import cleaning, test_parameters
-from biobrick_optimization_tool_synthesis.optimization.logic.codon_optimization_host import \
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning, test_parameters
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.codon_optimization_host import \
     determine_ideal_codon_optimized_sequence
-from biobrick_optimization_tool_synthesis.optimization.logic.set_codon_table import fetch_codon_table
-from biobrick_optimization_tool_synthesis.optimization.logic.test_parameters import algorithm_params
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
 
 
 def mutate_codon(sequence: Seq, codon_usage: dict, idx=0, translation_dict: dict = None):
