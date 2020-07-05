@@ -46,5 +46,6 @@ algorithm_params = {
     'restriction_sites': get_rest_enzymes_from_string(restriction_sites),
     'overlapping': True,
     'locations': True,
-    'repeat_size': 10
+    'repeat_size': 10,
+    'homopolymer_size': 4
 }

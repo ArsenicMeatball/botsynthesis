@@ -21,7 +21,8 @@ def eval_host(params: dict, out_q: Queue):
     for sequence in params['population'].keys():
         # convert to seq and send it
         out['eval_host'][sequence] = find_num_differences(
-            Seq(sequence, IUPAC.unambiguous_dna), params['codon_opt_seq']
+            Seq(sequence, IUPAC.unambiguous_dna),
+            params['codon_opt_seq']
         )
     out_q.put(out)
 
@@ -58,6 +59,24 @@ def eval_repeats(params: dict, out_q: Queue):
                 score = [find_number_of_non_overlapping_repeats(sequence, params['repeat_size'])]
         out['eval_repeats'][sequence] = score
     out_q.put(out)
+
+
+def eval_homopolymers(params: dict, out_q: Queue):
+    out = {'eval_homopolymers': {}}
+    for sequence in params['population'].keys():
+        repeat_and_locations = find_repeats(sequence, params['homopolymer_size'], overlapping=True)
+        # remove repeats with multiple letters
+        locations = {}
+        score = 0
+        for k, v in repeat_and_locations.items():
+            if len(set(k)) == 1:
+                if params['locations']:
+                    locations[k] = v
+                score += len(v)
+        out['eval_homopolymers'][sequence] = [score, locations]
+    out_q.put(out)
+
+
 
 """
 
@@ -108,28 +127,8 @@ def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
                 count += 1
     return score
 """
+
 """
-
-def eval_homopolymers(individual, homopolymer_threshold=4):
-    sequence = getattr(individual, "sequence")
-    seq = str(sequence.tomutable())
-
-    score = 0
-
-    # look at each (n_codons * 3)-mer
-    idx = 0
-    while idx < len(seq) - 4:
-        current_count = 1
-        current_letter = seq[idx]
-        idx += 1
-        while idx < len(seq) and seq[idx] is current_letter:
-            current_count += 1
-            if current_count > homopolymer_threshold:
-                score += 1
-            idx += 1
-    return score
-
-
 def eval_splice_sites(individual):
     sequence = getattr(individual, "sequence")
 
@@ -200,7 +199,8 @@ def eval_hairpins(individual, stem_length=10):
 fitness_evals = [
     eval_host,
     eval_repeats,
-    eval_restriction_sites
+    eval_restriction_sites,
+    eval_homopolymers
 ]
 """
 
