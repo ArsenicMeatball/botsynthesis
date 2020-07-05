@@ -91,7 +91,7 @@ def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
                 search = rbs_query_seq.find(site)
                 count += 1
     return score
-
+"""
 
 def eval_repeats(individual, window_size=10):
     sequence = getattr(individual, "sequence")
@@ -118,7 +118,7 @@ def eval_repeats(individual, window_size=10):
             # print(non_overlapping_matches)
             score += 1
     return score
-
+"""
 
 def eval_homopolymers(individual, homopolymer_threshold=4):
     sequence = getattr(individual, "sequence")
@@ -209,12 +209,13 @@ def eval_hairpins(individual, stem_length=10):
 
 fitness_evals = [
     eval_host,
+    eval_repeats,
     eval_restriction_sites
 ]
 """
 
 eval_start_sites,
-eval_repeats,
+
 eval_homopolymers,
 eval_splice_sites,
 eval_gc_content,
