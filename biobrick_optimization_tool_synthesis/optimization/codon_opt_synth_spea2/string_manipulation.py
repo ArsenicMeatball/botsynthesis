@@ -49,3 +49,21 @@ def find_repeats(string: str, min_repeat_size=10, overlapping=True) -> dict:
             if len(matches) > 1:
                 result[substring] = matches
     return result
+
+
+def find_separated_palindromes(string: str, min_separation_size: int = 3, max_separation_size: int = 30,
+                               palindrome_size: int = 10) -> dict:
+    result = {}
+    for separation in range(min_separation_size, max_separation_size + 1):
+        result[separation] = tuple()
+        if palindrome_size * 2 + separation <= len(string):  # check if sequence large enough
+            for idx in range(palindrome_size - 1, len(string) - palindrome_size - separation):  # need enough room
+                counter = 0
+                while counter < palindrome_size:
+                    if string[idx - counter] == string[idx + separation + 1 + counter]:
+                        counter += 1
+                    else:
+                        break
+                if counter == palindrome_size:
+                    result[separation] += tuple([idx, idx + separation])
+    return result

@@ -25,6 +25,8 @@ def eval_host(params: dict, out_q: Queue):
             params['codon_opt_seq']
         )
     out_q.put(out)
+    print('done evaluating against expression')
+    return
 
 
 def find_restriction_sites(restriction_batch: RestrictionBatch, sequence: Seq, linear=True):
@@ -44,6 +46,8 @@ def eval_restriction_sites(params: dict, out_q: Queue):
             score += len(sites)
         out['eval_rest_sites'][sequence] = score
     out_q.put(out)
+    print('done restriction sites')
+    return
 
 
 def eval_repeats(params: dict, out_q: Queue):
@@ -59,6 +63,8 @@ def eval_repeats(params: dict, out_q: Queue):
                 score = [find_number_of_non_overlapping_repeats(sequence, params['repeat_size'])]
         out['eval_repeats'][sequence] = score
     out_q.put(out)
+    print('done repeats')
+    return
 
 
 def eval_homopolymers(params: dict, out_q: Queue):
@@ -75,7 +81,40 @@ def eval_homopolymers(params: dict, out_q: Queue):
                 score += len(v)
         out['eval_homopolymers'][sequence] = [score, locations]
     out_q.put(out)
+    print('done homopolymers')
+    return
 
+
+def eval_hairpins(params: dict, out_q: Queue):
+    """loops cannot be less than 3 bases long
+
+    ideally 4-8 bases
+    longer requires extra rna structures
+
+    for each position
+    look at current, current + separation
+    then keep checking until stem length of 10result = {separation: set()}
+    """
+    out = {'eval_hairpins': {}}
+    if params['shortest_loop_length'] < 3:
+        raise AttributeError("Loop cannot be smaller than 3 (bio rules)")
+    if params['longest_loop_length'] > 30:
+        print("loop likely to be too unstable to exist without extra features inside")
+    for sequence in params['population'].keys():
+        palindrome_locations = find_separated_palindromes(
+            sequence,
+            params['shortest_loop_length'],
+            params['longest_loop_length'],
+            params['stem_length']
+        )
+        score = 0
+        for x in palindrome_locations.values():
+            score += len(x)
+        locations = tuple(palindrome_locations.values()) if params['locations'] else tuple()
+        out['eval_hairpins'][sequence] = [score, locations]
+    out_q.put(out)
+    print('done hairpins')
+    return
 
 
 """
@@ -179,35 +218,18 @@ def eval_gc_content(individual, gc):
             break
     return round(score)
 
-
-def eval_hairpins(individual, stem_length=10):
-    sequence = getattr(individual, "sequence")
-    mutable_seq = sequence.tomutable()
-    score = 0
-    for i in range(0, len(mutable_seq) - stem_length, 3):
-        stem_seq = mutable_seq[i: i + stem_length].toseq()
-        # include wobble base pairing for G-[CT]
-        hairpin_pattern = "".join(
-            [nt if nt != "C" else "[CT]" for nt in stem_seq.reverse_complement()]
-        )
-        for hairpin in re.finditer(hairpin_pattern, str(mutable_seq)):
-            if not (math.fabs(hairpin.start() - i) < stem_length or stem_length + 2 < hairpin.end() - hairpin.start()):
-                score += 1
-    return score
 """
 
 fitness_evals = [
     eval_host,
     eval_repeats,
     eval_restriction_sites,
-    eval_homopolymers
+    eval_homopolymers,
+    eval_hairpins
 ]
 """
 
 eval_start_sites,
-
-eval_homopolymers,
 eval_splice_sites,
 eval_gc_content,
-eval_hairpins
 """

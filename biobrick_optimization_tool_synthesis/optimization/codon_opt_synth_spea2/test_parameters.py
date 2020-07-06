@@ -42,10 +42,14 @@ algorithm_params = {
         'max': 0.9,
         'window_size': 20
     },
-    'generations': 3,
+    'generations': 1,
     'restriction_sites': get_rest_enzymes_from_string(restriction_sites),
     'overlapping': True,
     'locations': True,
     'repeat_size': 10,
-    'homopolymer_size': 4
+    'homopolymer_size': 4,
+    'shortest_loop_length': 3,
+    'longest_loop_length': 9,
+    'stem_length': 10
+
 }
