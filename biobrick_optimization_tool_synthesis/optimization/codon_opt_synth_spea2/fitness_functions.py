@@ -16,7 +16,11 @@ def find_num_differences(sequence1: Seq, sequence2: Seq) -> int:
     return sum(1 for a, b in zip(sequence1, sequence2) if a != b)
 
 
-def eval_host(params: dict, out_q: Queue):
+def find_restriction_sites(restriction_batch: RestrictionBatch, sequence: Seq, linear=True):
+    return Analysis(restrictionbatch=restriction_batch, sequence=sequence, linear=linear).full()
+
+
+def eval_host(params: dict, out_q: Queue) -> None:
     out = {'eval_host': {}}
     for sequence in params['population'].keys():
         # convert to seq and send it
@@ -29,11 +33,7 @@ def eval_host(params: dict, out_q: Queue):
     return
 
 
-def find_restriction_sites(restriction_batch: RestrictionBatch, sequence: Seq, linear=True):
-    return Analysis(restrictionbatch=restriction_batch, sequence=sequence, linear=linear).full()
-
-
-def eval_restriction_sites(params: dict, out_q: Queue):
+def eval_restriction_sites(params: dict, out_q: Queue) -> None:
     out = {'eval_rest_sites': {}}
     for sequence in params['population'].keys():
         rest_sites = find_restriction_sites(
@@ -50,7 +50,7 @@ def eval_restriction_sites(params: dict, out_q: Queue):
     return
 
 
-def eval_repeats(params: dict, out_q: Queue):
+def eval_repeats(params: dict, out_q: Queue) -> None:
     out = {'eval_repeats': {}}
     for sequence in params['population'].keys():
         if params['locations']:
@@ -67,7 +67,7 @@ def eval_repeats(params: dict, out_q: Queue):
     return
 
 
-def eval_homopolymers(params: dict, out_q: Queue):
+def eval_homopolymers(params: dict, out_q: Queue) -> None:
     out = {'eval_homopolymers': {}}
     for sequence in params['population'].keys():
         repeat_and_locations = find_repeats(sequence, params['homopolymer_size'], overlapping=True)
@@ -85,8 +85,9 @@ def eval_homopolymers(params: dict, out_q: Queue):
     return
 
 
-def eval_hairpins(params: dict, out_q: Queue):
-    """loops cannot be less than 3 bases long
+def eval_hairpins(params: dict, out_q: Queue) -> None:
+    """ Current test does NOT have hairpins
+    loops cannot be less than 3 bases long
 
     ideally 4-8 bases
     longer requires extra rna structures
@@ -116,6 +117,38 @@ def eval_hairpins(params: dict, out_q: Queue):
     print('done hairpins')
     return
 
+
+def get_windowed_gc(sequence: str, window: int) -> list:
+    seq = Seq(sequence, IUPAC.unambiguous_dna)
+    gc_results = list()
+    for idx in range(0, len(seq), window):
+        sequence_window = seq[idx:idx + window] if idx + window < len(seq) else seq[idx:len(seq)]
+        gc_percent = GC(sequence_window)
+        gc_results.append(gc_percent)
+    return gc_results
+
+
+def eval_gc(params: dict, out_q: Queue) -> None:
+    out = {'eval_gc': {}}
+    if len(params['gc_params']) < 1:
+        raise AttributeError("gc_params should not be empty")
+    for gc_param in params['gc_params']:
+        if len(gc_param) != 3 or \
+                not isinstance(gc_param[0], float) or \
+                not isinstance(gc_param[1], float) or \
+                not isinstance(gc_param[2], int):
+            raise AttributeError("gc_params should contain float low%, float high%, int window size")
+    for sequence in params['population'].keys():
+        score = 0
+        for gc_param in params['gc_params']:
+            gc_results = get_windowed_gc(sequence, gc_param[2])
+            for result in gc_results:
+                if result < gc_param[0] or result > gc_param[1]:
+                    score += 1
+        out['eval_gc'][sequence] = score
+    out_q.put(out)
+    print('done gc')
+    return
 
 """
 
@@ -192,32 +225,6 @@ def eval_splice_sites(individual):
         pass
 
     return len(_get_splice_sites(sequence.tomutable))
-
-
-def eval_gc_content(individual, gc):
-    sequence = getattr(individual, "sequence")
-    window_size = gc.window_size  # tuples are immutable
-    # some windows may be expressed as function of the sequence length
-    if isinstance(window_size, str) and window_size.startswith("x"):
-        window_size = int(float(window_size[1:]) * len(sequence))
-
-    mutable_seq = sequence.tomutable()
-    score = 0
-    for i in range(len(mutable_seq)):
-        window = slice(
-            i,
-            (i + window_size)
-            if (i + window_size) < len(mutable_seq)
-            else len(mutable_seq),
-        )
-        gc_percent = GC(mutable_seq[window]) / 100
-
-        if gc_percent > gc.high:
-            score += (gc_percent - gc.high) * 100
-        if window.stop is len(mutable_seq):
-            break
-    return round(score)
-
 """
 
 fitness_evals = [
@@ -225,11 +232,6 @@ fitness_evals = [
     eval_repeats,
     eval_restriction_sites,
     eval_homopolymers,
-    eval_hairpins
+    eval_hairpins,
+    eval_gc
 ]
-"""
-
-eval_start_sites,
-eval_splice_sites,
-eval_gc_content,
-"""
