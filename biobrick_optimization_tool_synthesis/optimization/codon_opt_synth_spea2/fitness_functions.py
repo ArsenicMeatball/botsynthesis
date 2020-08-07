@@ -11,30 +11,38 @@ from Bio.SeqUtils import GC
 
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_manipulation import *
 
+# fitness function score name in dict
+score_host = 'eval_host'
+score_restriction = 'eval_rest_sites'
+score_repeats = 'eval_repeats'
+score_homopolymers = 'eval_homopolymers'
+score_hairpins = 'eval_hairpins'
+score_gc = 'eval_gc'
+score_names = [score_host, score_restriction, score_repeats, score_gc, score_homopolymers, score_hairpins]
+
 
 def find_num_differences(sequence1: Seq, sequence2: Seq) -> int:
     return sum(1 for a, b in zip(sequence1, sequence2) if a != b)
+
+
+def eval_host(params: dict, out_q: Queue) -> None:
+    out = {score_host: {}}
+    for sequence in params['population'].keys():
+        score = find_num_differences(
+            Seq(sequence, IUPAC.unambiguous_dna),
+            params['codon_opt_seq']
+        )
+        out[score_host][sequence] = [score]
+    out_q.put(out)
+    return
 
 
 def find_restriction_sites(restriction_batch: RestrictionBatch, sequence: Seq, linear=True):
     return Analysis(restrictionbatch=restriction_batch, sequence=sequence, linear=linear).full()
 
 
-def eval_host(params: dict, out_q: Queue) -> None:
-    out = {'eval_host': {}}
-    for sequence in params['population'].keys():
-        # convert to seq and send it
-        out['eval_host'][sequence] = find_num_differences(
-            Seq(sequence, IUPAC.unambiguous_dna),
-            params['codon_opt_seq']
-        )
-    out_q.put(out)
-    print('done evaluating against expression')
-    return
-
-
 def eval_restriction_sites(params: dict, out_q: Queue) -> None:
-    out = {'eval_rest_sites': {}}
+    out = {score_restriction: {}}
     for sequence in params['population'].keys():
         rest_sites = find_restriction_sites(
             params['restriction_sites'],
@@ -44,14 +52,13 @@ def eval_restriction_sites(params: dict, out_q: Queue) -> None:
         score = 0
         for sites in rest_sites.values():
             score += len(sites)
-        out['eval_rest_sites'][sequence] = score
+        out[score_restriction][sequence] = [score]
     out_q.put(out)
-    print('done restriction sites')
     return
 
 
 def eval_repeats(params: dict, out_q: Queue) -> None:
-    out = {'eval_repeats': {}}
+    out = {score_repeats: {}}
     for sequence in params['population'].keys():
         if params['locations']:
             locations = find_repeats(sequence, params['repeat_size'], params['overlapping'])
@@ -61,14 +68,13 @@ def eval_repeats(params: dict, out_q: Queue) -> None:
                 score = [find_number_of_overlapping_repeats(sequence, params['repeat_size'])]
             else:
                 score = [find_number_of_non_overlapping_repeats(sequence, params['repeat_size'])]
-        out['eval_repeats'][sequence] = score
+        out[score_repeats][sequence] = score
     out_q.put(out)
-    print('done repeats')
     return
 
 
 def eval_homopolymers(params: dict, out_q: Queue) -> None:
-    out = {'eval_homopolymers': {}}
+    out = {score_homopolymers: {}}
     for sequence in params['population'].keys():
         repeat_and_locations = find_repeats(sequence, params['homopolymer_size'], overlapping=True)
         # remove repeats with multiple letters
@@ -79,9 +85,8 @@ def eval_homopolymers(params: dict, out_q: Queue) -> None:
                 if params['locations']:
                     locations[k] = v
                 score += len(v)
-        out['eval_homopolymers'][sequence] = [score, locations]
+        out[score_homopolymers][sequence] = [score, locations]
     out_q.put(out)
-    print('done homopolymers')
     return
 
 
@@ -96,7 +101,7 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
     look at current, current + separation
     then keep checking until stem length of 10result = {separation: set()}
     """
-    out = {'eval_hairpins': {}}
+    out = {score_hairpins: {}}
     if params['shortest_loop_length'] < 3:
         raise AttributeError("Loop cannot be smaller than 3 (bio rules)")
     if params['longest_loop_length'] > 30:
@@ -112,9 +117,8 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
         for x in palindrome_locations.values():
             score += len(x)
         locations = tuple(palindrome_locations.values()) if params['locations'] else tuple()
-        out['eval_hairpins'][sequence] = [score, locations]
+        out[score_hairpins][sequence] = [score, locations]
     out_q.put(out)
-    print('done hairpins')
     return
 
 
@@ -129,7 +133,7 @@ def get_windowed_gc(sequence: str, window: int) -> list:
 
 
 def eval_gc(params: dict, out_q: Queue) -> None:
-    out = {'eval_gc': {}}
+    out = {score_gc: {}}
     if len(params['gc_params']) < 1:
         raise AttributeError("gc_params should not be empty")
     for gc_param in params['gc_params']:
@@ -145,13 +149,13 @@ def eval_gc(params: dict, out_q: Queue) -> None:
             for result in gc_results:
                 if result < gc_param[0] or result > gc_param[1]:
                     score += 1
-        out['eval_gc'][sequence] = score
+        out[score_gc][sequence] = [score]
     out_q.put(out)
-    print('done gc')
     return
 
-"""
 
+"""
+# are these necessary? ask the bio people
 def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
     sequence = getattr(individual, "sequence")
     codon_table = CodonTable.unambiguous_dna_by_name[table_name]
@@ -198,9 +202,7 @@ def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
                 search = rbs_query_seq.find(site)
                 count += 1
     return score
-"""
 
-"""
 def eval_splice_sites(individual):
     sequence = getattr(individual, "sequence")
 

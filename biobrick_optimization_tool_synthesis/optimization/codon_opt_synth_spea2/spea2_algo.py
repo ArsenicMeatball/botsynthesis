@@ -6,6 +6,7 @@ from Bio.Seq import Seq
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning, test_parameters
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.codon_optimization_host import \
     determine_ideal_codon_optimized_sequence
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.domination import find_dominated_solutions
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import fitness_evals
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations import initialize_population
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
@@ -15,7 +16,7 @@ from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tes
 def spea2_main_loop(params: dict):
     # create population
     params['population'] = initialize_population(params)
-    # start loop
+    # main loop
     generation = 0
     is_converged = False
     out_q = mp.Queue()
@@ -47,10 +48,12 @@ def spea2_main_loop(params: dict):
             for seq, score in seq_n_score.items():
                 params['population'][seq][eval_type] = score
 
-    for k, v in params['population'].items():
-        print(k, v)
-    # domination
-    # fitness
+        # domination
+        dominated, non_dominated = find_dominated_solutions(params['population'].values())
+
+        for k, v in params['population'].items():
+            print(k, v)
+        # fitness
 
 
 if __name__ == '__main__':
