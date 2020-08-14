@@ -49,7 +49,7 @@ def spea2_main_loop(params: dict):
                 params['population'][seq][eval_type] = score
 
         # domination
-        dominated, non_dominated = find_dominated_solutions(params['population'].values())
+        total_population = find_dominated_solutions(params['population'])
 
         for k, v in params['population'].items():
             print(k, v)
