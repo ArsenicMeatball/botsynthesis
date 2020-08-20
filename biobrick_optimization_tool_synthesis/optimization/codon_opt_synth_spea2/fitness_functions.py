@@ -1,3 +1,4 @@
+import logging
 import re
 import math
 import time
@@ -9,7 +10,7 @@ from Bio.Restriction import Analysis, RestrictionBatch
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_manipulation import *
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import *
 
 # fitness function score name in dict
 score_host = 'eval_host'
@@ -109,43 +110,65 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
             params['longest_loop_length'],
             params['stem_length']
         )
+        logging.debug(palindrome_locations)
         score = 0
         for x in palindrome_locations.values():
             score += len(x)
-        locations = tuple(palindrome_locations.values()) if params['locations'] else tuple()
-        out[score_hairpins][sequence] = [score, locations]
+        out[score_hairpins][sequence] = [score, palindrome_locations]
     out_q.put(out)
     return
 
 
 def get_windowed_gc(sequence: str, window: int) -> list:
+    """
+    Gets the
+    :param sequence:
+    :param window:
+    :return: list of lists with idx 0 being the percent and idx 1-2 being the start-finish of the window
+    """
     seq = Seq(sequence, IUPAC.unambiguous_dna)
     gc_results = list()
-    for idx in range(0, len(seq), window):
+    for idx in range(0, len(seq)):
         sequence_window = seq[idx:idx + window] if idx + window < len(seq) else seq[idx:len(seq)]
+        # this returns percent as 90.0 = 90% instead of 0.9
         gc_percent = GC(sequence_window)
+        # convert to decimal
+        gc_percent /= 100
         gc_results.append(gc_percent)
+        logging.debug('index {0}, percent {1}'.format(idx, gc_percent))
+        if seq[idx:len(seq)] == sequence_window:
+            break
+    logging.debug(gc_results)
     return gc_results
 
 
 def eval_gc(params: dict, out_q: Queue) -> None:
     out = {score_gc: {}}
-    if len(params['gc_params']) < 1:
-        raise AttributeError("gc_params should not be empty")
-    for gc_param in params['gc_params']:
-        if len(gc_param) != 3 or \
-                not isinstance(gc_param[0], float) or \
-                not isinstance(gc_param[1], float) or \
-                not isinstance(gc_param[2], int):
-            raise AttributeError("gc_params should contain float low%, float high%, int window size")
+    if len(params['gc_parameters']) != 3 or \
+            not isinstance(params['gc_parameters']['min'], float) or \
+            not isinstance(params['gc_parameters']['max'], float) or \
+            not isinstance(params['gc_parameters']['window_size'], int):
+        raise AttributeError("gc_params should contain float low%, float high%, int window size")
     for sequence in params['population'].keys():
         score = 0
-        for gc_param in params['gc_params']:
-            gc_results = get_windowed_gc(sequence, gc_param[2])
-            for result in gc_results:
-                if result < gc_param[0] or result > gc_param[1]:
-                    score += 1
-        out[score_gc][sequence] = [score]
+        gc_results = get_windowed_gc(sequence, params['gc_parameters']['window_size'])
+        for result in gc_results:
+            if result < params['gc_parameters']['min']:
+                logging.debug(
+                    'min {0}, actual {1}, was found to be low'.format(
+                        params['gc_parameters']['min'],
+                        result
+                    )
+                )
+            elif result > params['gc_parameters']['max']:
+                score += 1
+                logging.debug(
+                    'max {0}, actual {1}, was found to be high'.format(
+                        params['gc_parameters']['max'],
+                        result
+                    )
+                )
+        out[score_gc][sequence] = [score, gc_results]
     out_q.put(out)
     return
 

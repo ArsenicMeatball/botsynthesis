@@ -1,6 +1,6 @@
 import unittest
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_manipulation import *
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import *
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
 
 
