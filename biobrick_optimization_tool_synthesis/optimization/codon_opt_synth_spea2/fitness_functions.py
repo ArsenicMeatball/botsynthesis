@@ -45,10 +45,10 @@ def eval_restriction_sites(params: dict, out_q: Queue) -> None:
             Seq(sequence, IUPAC.unambiguous_dna),
             params['linear']
         )
-        score = 0
+        score = [0, list(rest_sites.values())]
         for sites in rest_sites.values():
-            score += len(sites)
-        out[score_restriction][sequence] = [score]
+            score[0] += len(sites)
+        out[score_restriction][sequence] = score
     out_q.put(out)
     return
 
