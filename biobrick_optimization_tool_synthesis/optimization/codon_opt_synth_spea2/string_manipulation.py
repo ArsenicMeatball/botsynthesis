@@ -67,3 +67,7 @@ def find_separated_palindromes(string: str, min_separation_size: int = 3, max_se
                 if counter == palindrome_size:
                     result[separation] += tuple([idx, idx + separation])
     return result
+
+
+def find_num_differences(str1: str, str2: str) -> int:
+    return sum(1 for a, b in zip(str1, str2) if a != b)

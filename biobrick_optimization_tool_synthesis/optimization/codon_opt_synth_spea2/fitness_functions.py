@@ -21,15 +21,11 @@ score_gc = 'eval_gc'
 score_names = [score_host, score_restriction, score_repeats, score_gc, score_homopolymers, score_hairpins]
 
 
-def find_num_differences(sequence1: Seq, sequence2: Seq) -> int:
-    return sum(1 for a, b in zip(sequence1, sequence2) if a != b)
-
-
 def eval_host(params: dict, out_q: Queue) -> None:
     out = {score_host: {}}
     for sequence in params['population'].keys():
         score = find_num_differences(
-            Seq(sequence, IUPAC.unambiguous_dna),
+            sequence,
             params['codon_opt_seq']
         )
         out[score_host][sequence] = [score]
