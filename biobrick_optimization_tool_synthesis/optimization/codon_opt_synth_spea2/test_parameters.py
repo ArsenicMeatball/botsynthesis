@@ -39,7 +39,7 @@ algorithm_params = {
     'linear': True,
     'gc_parameters': {
         'min': 0.1,
-        'max': 0.9,
+        'max': 0.68,
         'window_size': 20
     },
     'generations': 1,
@@ -51,6 +51,5 @@ algorithm_params = {
     'shortest_loop_length': 3,
     'longest_loop_length': 9,
     'stem_length': 10,
-    'gc_params': [(0.4, 0.68, 20)]
 
 }

@@ -1,4 +1,5 @@
 from typing import Union
+
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import score_names
 
 neither_equal_case = 'neither'

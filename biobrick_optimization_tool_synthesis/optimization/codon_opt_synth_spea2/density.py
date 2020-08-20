@@ -1,14 +1,9 @@
-# k = sqrt(sample size)
-# D = 1 / (kth distance + 2)
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions import \
     get_number_of_differences_dict_list
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import score_names
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.list_functions import \
     number_of_differences_between_two_lists
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import \
     find_num_differences
-
-score_names = [score_host, score_restriction, score_repeats, score_gc, score_homopolymers, score_hairpins]
 
 
 def get_host_distance(str1: str, str2: str) -> int:
@@ -25,7 +20,7 @@ def get_restriction_distance(locations1: list, locations2: list) -> int:
     """
     determine the differences in restriction site locations
     :param locations1: (list) list containing lists of locations where a restriction site occurs
-    :param locations2: (list) list containing lists of locations where a restriction site occurs (same order as the above)
+    :param locations2: (list) list containing lists of locations where a restriction site occurs
     expects [[idx],[],[idx, idx, idx] ... ]
     :return: (int) the number of differences between the two lists
     """
@@ -70,7 +65,7 @@ def get_homopolymers_distance(homo_n_locations1: dict, homo_n_locations2: dict) 
     return get_number_of_differences_dict_list(homo_n_locations1, homo_n_locations2)
 
 
-def get_hairpin_distance(hairpin_lengths_n_locations1:dict, hairpin_lengths_n_locations2:dict) -> int:
+def get_hairpin_distance(hairpin_lengths_n_locations1: dict, hairpin_lengths_n_locations2: dict) -> int:
     """
 
     :param hairpin_lengths_n_locations1:
@@ -78,6 +73,7 @@ def get_hairpin_distance(hairpin_lengths_n_locations1:dict, hairpin_lengths_n_lo
     :return:
     """
     return get_number_of_differences_dict_list(hairpin_lengths_n_locations1, hairpin_lengths_n_locations2)
+
 
 if __name__ == '__main__':
     x = ()

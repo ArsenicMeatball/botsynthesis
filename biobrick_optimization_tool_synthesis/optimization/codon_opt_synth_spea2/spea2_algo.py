@@ -52,7 +52,9 @@ def spea2_main_loop(params: dict):
         total_population = find_dominated_solutions(params['population'])
 
         for k, v in params['population'].items():
-            print(k, v)
+            print(k)
+            for kk, vv in v.items():
+                print(kk, vv)
         # fitness
 
 
