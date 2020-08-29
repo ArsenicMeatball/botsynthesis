@@ -1,15 +1,56 @@
-from typing import Union
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_funcs
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import score_names
-
-neither_equal_case = 'neither'
-dominates_case = 'dominates'
-dominated_case = 'dominated'
-strength_key = 'strength'
-raw_fitness_key = 'raw fitness'
+__NEITHER_EQUAL_CASE__ = 'neither'
+__DOMINATES_CASE__ = 'dominates'
+__DOMINATED_CASE__ = 'dominated'
+__STRENGTH_KEY__ = 'strength'
+__RAW_FITNESS_KEY__ = 'raw fitness'
 
 
-def compare_two_solutions_for_dominance(point_a: dict, point_b: dict, coordinates: list = score_names) -> tuple:
+def calculate_raw_fitness(population):
+    """
+    Calculates strength and raw fitness values for every member of the population
+    :param population: dict of sequences and values
+    :return: None, updates population
+    """
+    left_x_right = find_dominated_solutions(population)
+    calculate_strength(left_x_right, population)
+    parse_for_raw_fitness(left_x_right, population)
+
+
+def find_dominated_solutions(population: dict) -> dict:
+    """
+
+    :param population: (dict)
+    :return: (dict)
+    """
+    # test all pairs to see if they get dominated O(dn^2)
+    left_x_right = {}
+    visited = set()
+    for seq1 in population.keys():
+        for seq2 in population.keys():
+            # prevent key errors
+            if seq1 not in left_x_right:
+                left_x_right[seq1] = {seq2: __NEITHER_EQUAL_CASE__}
+            if seq2 not in left_x_right:
+                left_x_right[seq2] = {seq1: __NEITHER_EQUAL_CASE__}
+
+            if (seq1, seq2) not in visited:
+                left = population[seq1]
+                right = population[seq2]
+                left_x_right[seq1][seq2], left_x_right[seq2][seq1] = compare_two_solutions_for_dominance(
+                    left, right, fit_funcs.__SCORE_NAMES__
+                )
+                visited.add((seq1, seq2))
+                visited.add((seq2, seq1))
+    return left_x_right
+
+
+def compare_two_solutions_for_dominance(
+        point_a: dict,
+        point_b: dict,
+        coordinates: list,
+) -> tuple:
     """ Determines if one of the points is dominated:
     Domination (for minima):
         x dominates y, if for all coordinates, x's coordinate is smaller or equal to y's coordinate
@@ -38,20 +79,20 @@ def compare_two_solutions_for_dominance(point_a: dict, point_b: dict, coordinate
             tally_b += 1
     # neither dominates
     if tally_a > 0 and tally_b > 0:
-        return neither_equal_case, neither_equal_case
+        return __NEITHER_EQUAL_CASE__, __NEITHER_EQUAL_CASE__
     # always equal case
     elif tally_a == tally_b == 0:
-        return neither_equal_case, neither_equal_case
+        return __NEITHER_EQUAL_CASE__, __NEITHER_EQUAL_CASE__
     # b dominates
     elif tally_a == 0:
-        return dominated_case, dominates_case
+        return __DOMINATED_CASE__, __DOMINATES_CASE__
     # a dominates
     elif tally_b == 0:
-        return dominates_case, dominated_case
+        return __DOMINATES_CASE__, __DOMINATED_CASE__
     raise RuntimeError('should not be able to get here')
 
 
-def parse_dominated_solutions_for_strength(left_x_right: dict, population: dict) -> dict:
+def calculate_strength(left_x_right: dict, population: dict) -> dict:
     """
     Parse dict for
     strength value : how many solutions it dominates
@@ -62,13 +103,13 @@ def parse_dominated_solutions_for_strength(left_x_right: dict, population: dict)
     for seq1, seq2_dict in left_x_right.items():
         strength = 0
         for seq2 in seq2_dict.keys():
-            if left_x_right[seq1][seq2] == dominates_case:
+            if left_x_right[seq1][seq2] == __DOMINATES_CASE__:
                 strength += 1
-        population[seq1][strength_key] = strength
+        population[seq1][__STRENGTH_KEY__] = strength
     return population
 
 
-def parse_dominated_solutions_for_raw_fitness(left_x_right: dict, population: dict) -> dict:
+def parse_for_raw_fitness(left_x_right: dict, population: dict):
     """
     Parse dict for:
     raw fitness value: the sum of the strengths of solutions which dominate it
@@ -83,42 +124,11 @@ def parse_dominated_solutions_for_raw_fitness(left_x_right: dict, population: di
 
     :param left_x_right:
     :param population:
-    :return:
+    :return: None, updates population
     """
     for seq1, seq2_dict in left_x_right.items():
         raw_fitness = 0
         for seq2 in seq2_dict.keys():
-            if left_x_right[seq1][seq2] == dominated_case:
-                raw_fitness += population[seq2][strength_key]
-        population[seq1][raw_fitness_key] = raw_fitness
-    return population
-
-
-def find_dominated_solutions(population: dict) -> dict:
-    """
-
-    :param population: (dict)
-    :return: (dict)
-    """
-    # test all pairs to see if they get dominated O(dn^2)
-    left_x_right = {}
-    visited = set()
-    for seq1 in population.keys():
-        for seq2 in population.keys():
-            # prevent key errors
-            if seq1 not in left_x_right:
-                left_x_right[seq1] = {seq2: neither_equal_case}
-            if seq2 not in left_x_right:
-                left_x_right[seq2] = {seq1: neither_equal_case}
-
-            if (seq1, seq2) not in visited:
-                left = population[seq1]
-                right = population[seq2]
-                left_x_right[seq1][seq2], left_x_right[seq2][seq1] = compare_two_solutions_for_dominance(
-                    left, right
-                )
-                visited.add((seq1, seq2))
-                visited.add((seq2, seq1))
-    # update population
-    population = parse_dominated_solutions_for_strength(left_x_right, population)
-    population = parse_dominated_solutions_for_raw_fitness(left_x_right, population)
+            if left_x_right[seq1][seq2] == __DOMINATED_CASE__:
+                raw_fitness += population[seq2][__STRENGTH_KEY__]
+        population[seq1][__RAW_FITNESS_KEY__] = raw_fitness
