@@ -1,13 +1,95 @@
+from math import sqrt
+
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions import \
-    get_number_of_differences_dict_list
+    get_number_of_differences_dict_list, sort_dict_by_value_get_list_of_keys
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_funcs
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.list_functions import \
     number_of_differences_between_two_lists
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import \
     find_num_differences
 
+__DENSITY_KEY__ = 'density'
+
+
+def calculate_density(population: dict):
+    """
+    calculates the density of a sequence based on the kth nearest neighbour
+    D = (distance to kth nearest neighbour + 2)^-1, where k is sqrt(population + archive size)
+    :param population: dict containing all sequences in the population and the archive
+    :return: None, updates population
+    """
+    k = round(sqrt(len(population)))
+    all_distances = calculate_distances_for_all_sequences(population)
+    for sequence, neighbours in all_distances.items():
+        k_nearest_neighbour = get_kth_neirest_neighbour_dict(neighbours, k)
+        population[sequence][__DENSITY_KEY__] = pow((all_distances[sequence][k_nearest_neighbour] + 2), -1)
+
+
+def get_kth_neirest_neighbour_dict(neighbours: dict, k: int) -> str:
+    """
+    gets the kth minimum distance in a dictionary
+    :param k: whicvh neighbour to look for, eg k=4, 4th neighbour
+    :param neighbours: dict of neighbours {sequence: distance}
+    :return: the kth neirest neighbour
+    """
+    in_order = sort_dict_by_value_get_list_of_keys(neighbours)
+    return in_order[k]
+
+
+def calculate_distances_for_all_sequences(population: dict) -> dict:
+    """
+    Calculates the distances between all sequences and puts it into a graph
+    :param population:
+    :return:
+    """
+    distances = {}
+    for sequence1, seq1_vals in population.items():
+        if sequence1 not in distances:
+            distances[sequence1] = {}
+        for sequence2, seq2_vals in population.items():
+            if sequence2 not in distances:
+                distances[sequence2] = {}
+            if sequence2 not in distances[sequence1]:
+                dist = get_total_distance(sequence1, seq1_vals, sequence2, seq2_vals)
+                distances[sequence1][sequence2] = dist
+                distances[sequence2][sequence1] = dist
+    return distances
+
+
+def get_total_distance(sequence1: str, seq1_vals: dict, sequence2: str, seq2_vals: dict) -> float:
+    """
+    just the sum of all the distances between 2 sequences
+    :param seq2_vals:
+    :param seq1_vals:
+    :param sequence1:
+    :param sequence2:
+    :return:
+    """
+    total_distance = get_host_distance(
+        sequence1,
+        sequence2
+    ) + get_restriction_distance(
+        seq1_vals[fit_funcs.__SCORE_RESTRICTION__][1],
+        seq2_vals[fit_funcs.__SCORE_RESTRICTION__][1]
+    ) + get_repeat_distance(
+        seq1_vals[fit_funcs.__SCORE_REPEATS__][1],
+        seq2_vals[fit_funcs.__SCORE_REPEATS__][1]
+    ) + get_gc_distance(
+        seq1_vals[fit_funcs.__SCORE_GC__][1],
+        seq2_vals[fit_funcs.__SCORE_GC__][1]
+    ) + get_homopolymers_distance(
+        seq1_vals[fit_funcs.__SCORE_HOMOPOLYMERS__][1],
+        seq2_vals[fit_funcs.__SCORE_HOMOPOLYMERS__][1]
+    ) + get_hairpin_distance(
+        seq1_vals[fit_funcs.__SCORE_HAIRPINS__][1],
+        seq2_vals[fit_funcs.__SCORE_HAIRPINS__][1]
+    )
+    return total_distance
+
 
 def get_host_distance(str1: str, str2: str) -> int:
     """
+    Hamming distance
     determine the differences between the two sequences instead of the difference with the host
     :argument str1 (str) the first string to compare
     :argument str2 (str) the second string to compare
@@ -18,7 +100,7 @@ def get_host_distance(str1: str, str2: str) -> int:
 
 def get_restriction_distance(locations1: list, locations2: list) -> int:
     """
-    determine the differences in restriction site locations
+    determine the differences in number of restriction sites and their locations
     :param locations1: (list) list containing lists of locations where a restriction site occurs
     :param locations2: (list) list containing lists of locations where a restriction site occurs
     expects [[idx],[],[idx, idx, idx] ... ]
@@ -26,14 +108,14 @@ def get_restriction_distance(locations1: list, locations2: list) -> int:
     """
     differences = 0
     # for each restriction enzyme
-    for idx in range(1, len(locations1)):
-        differences = number_of_differences_between_two_lists(locations1[idx], locations2[idx])
+    for enz_left, enz_right in zip(locations1, locations2):
+        differences = number_of_differences_between_two_lists(enz_left, enz_right)
     return differences
 
 
 def get_repeat_distance(repeat_n_locations1: dict, repeat_n_locations2: dict) -> int:
     """
-    determine the differences between the two dictionaries
+    determine the differences in the repeats and their locations between the two dictionaries
     expects {'repeat_sequence':[idx, idx], 'seq':[idx] ... }
     :param repeat_n_locations1: the sequences and the locations and the indices they are in
     :param repeat_n_locations2: the sequences and the locations and the indices they are in
@@ -51,8 +133,8 @@ def get_gc_distance(percents1: list, percents2: list) -> float:
     :return: the sum of the differences
     """
     sum_difference = 0
-    for idx in range(len(percents1)):
-        sum_difference += abs(percents1[idx] - percents2[idx])
+    for percent1, percent2 in zip(percents1, percents2):
+        sum_difference += abs(percent1 - percent2)
     return sum_difference
 
 
@@ -73,9 +155,3 @@ def get_hairpin_distance(hairpin_lengths_n_locations1: dict, hairpin_lengths_n_l
     :return:
     """
     return get_number_of_differences_dict_list(hairpin_lengths_n_locations1, hairpin_lengths_n_locations2)
-
-
-if __name__ == '__main__':
-    x = ()
-    print(x)
-    print(len(x))
