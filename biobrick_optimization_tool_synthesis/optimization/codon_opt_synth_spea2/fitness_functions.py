@@ -1,35 +1,62 @@
 import logging
-import re
-import math
-import time
+
 from queue import Queue
 
 from Bio.Alphabet import IUPAC
-from Bio.Data import CodonTable
 from Bio.Restriction import Analysis, RestrictionBatch
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import *
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.density import calculate_density, \
+    __DENSITY_KEY__
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.domination import calculate_raw_fitness, \
+    __RAW_FITNESS_KEY__
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import \
+    find_num_differences, get_number_of_repeats_from_dict, find_repeats, find_number_of_overlapping_repeats, \
+    find_number_of_non_overlapping_repeats, find_separated_palindromes
 
 # fitness function score name in dict
-score_host = 'eval_host'
-score_restriction = 'eval_rest_sites'
-score_repeats = 'eval_repeats'
-score_homopolymers = 'eval_homopolymers'
-score_hairpins = 'eval_hairpins'
-score_gc = 'eval_gc'
-score_names = [score_host, score_restriction, score_repeats, score_gc, score_homopolymers, score_hairpins]
+__SCORE_HOST__ = 'eval_host'
+__SCORE_RESTRICTION__ = 'eval_rest_sites'
+__SCORE_REPEATS__ = 'eval_repeats'
+__SCORE_HOMOPOLYMERS__ = 'eval_homopolymers'
+__SCORE_HAIRPINS__ = 'eval_hairpins'
+__SCORE_GC__ = 'eval_gc'
+__SCORE_NAMES__ = [
+    __SCORE_HOST__,
+    __SCORE_RESTRICTION__,
+    __SCORE_REPEATS__,
+    __SCORE_GC__,
+    __SCORE_HOMOPOLYMERS__,
+    __SCORE_HAIRPINS__,
+]
+__FITNESS_KEY__ = 'fitness'
 
+
+def calculate_fitness(population: dict):
+    """
+    Calculates final fitness
+    Fitness = Raw fitness + density
+    :param population:
+    :return: None, update population
+    """
+    calculate_raw_fitness(population)
+    calculate_density(population)
+    for sequence in population:
+        population[sequence][__FITNESS_KEY__] = population[sequence][__RAW_FITNESS_KEY__] + \
+                                                population[sequence][__DENSITY_KEY__]
+
+
+# Specific fitness
 
 def eval_host(params: dict, out_q: Queue) -> None:
-    out = {score_host: {}}
+    out = {__SCORE_HOST__: {}}
     for sequence in params['population'].keys():
         score = find_num_differences(
             sequence,
             params['codon_opt_seq']
         )
-        out[score_host][sequence] = [score]
+        out[__SCORE_HOST__][sequence] = [score]
     out_q.put(out)
     return
 
@@ -39,7 +66,7 @@ def find_restriction_sites(restriction_batch: RestrictionBatch, sequence: Seq, l
 
 
 def eval_restriction_sites(params: dict, out_q: Queue) -> None:
-    out = {score_restriction: {}}
+    out = {__SCORE_RESTRICTION__: {}}
     for sequence in params['population'].keys():
         rest_sites = find_restriction_sites(
             params['restriction_sites'],
@@ -49,13 +76,13 @@ def eval_restriction_sites(params: dict, out_q: Queue) -> None:
         score = [0, list(rest_sites.values())]
         for sites in rest_sites.values():
             score[0] += len(sites)
-        out[score_restriction][sequence] = score
+        out[__SCORE_RESTRICTION__][sequence] = score
     out_q.put(out)
     return
 
 
 def eval_repeats(params: dict, out_q: Queue) -> None:
-    out = {score_repeats: {}}
+    out = {__SCORE_REPEATS__: {}}
     for sequence in params['population'].keys():
         if params['locations']:
             locations = find_repeats(sequence, params['repeat_size'], params['overlapping'])
@@ -65,13 +92,13 @@ def eval_repeats(params: dict, out_q: Queue) -> None:
                 score = [find_number_of_overlapping_repeats(sequence, params['repeat_size'])]
             else:
                 score = [find_number_of_non_overlapping_repeats(sequence, params['repeat_size'])]
-        out[score_repeats][sequence] = score
+        out[__SCORE_REPEATS__][sequence] = score
     out_q.put(out)
     return
 
 
 def eval_homopolymers(params: dict, out_q: Queue) -> None:
-    out = {score_homopolymers: {}}
+    out = {__SCORE_HOMOPOLYMERS__: {}}
     for sequence in params['population'].keys():
         repeat_and_locations = find_repeats(sequence, params['homopolymer_size'], overlapping=True)
         # remove repeats with multiple letters
@@ -82,7 +109,7 @@ def eval_homopolymers(params: dict, out_q: Queue) -> None:
                 if params['locations']:
                     locations[k] = v
                 score += len(v)
-        out[score_homopolymers][sequence] = [score, locations]
+        out[__SCORE_HOMOPOLYMERS__][sequence] = [score, locations]
     out_q.put(out)
     return
 
@@ -98,7 +125,7 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
     look at current, current + separation
     then keep checking until stem length of 10result = {separation: set()}
     """
-    out = {score_hairpins: {}}
+    out = {__SCORE_HAIRPINS__: {}}
     if params['shortest_loop_length'] < 3:
         raise AttributeError("Loop cannot be smaller than 3 (bio rules)")
     if params['longest_loop_length'] > 30:
@@ -114,7 +141,7 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
         score = 0
         for x in palindrome_locations.values():
             score += len(x)
-        out[score_hairpins][sequence] = [score, palindrome_locations]
+        out[__SCORE_HAIRPINS__][sequence] = [score, palindrome_locations]
     out_q.put(out)
     return
 
@@ -143,7 +170,7 @@ def get_windowed_gc(sequence: str, window: int) -> list:
 
 
 def eval_gc(params: dict, out_q: Queue) -> None:
-    out = {score_gc: {}}
+    out = {__SCORE_GC__: {}}
     if len(params['gc_parameters']) != 3 or \
             not isinstance(params['gc_parameters']['min'], float) or \
             not isinstance(params['gc_parameters']['max'], float) or \
@@ -168,7 +195,7 @@ def eval_gc(params: dict, out_q: Queue) -> None:
                         result
                     )
                 )
-        out[score_gc][sequence] = [score, gc_results]
+        out[__SCORE_GC__][sequence] = [score, gc_results]
     out_q.put(out)
     return
 
