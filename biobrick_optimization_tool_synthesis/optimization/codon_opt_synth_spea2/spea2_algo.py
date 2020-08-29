@@ -8,7 +8,7 @@ from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tes
 
 def spea2_main_loop(params: dict):
     # create population
-    params['population'] = initialize_population(params)
+    params['population'], sequences_set = initialize_population(params)
     # main loop
     is_converged = False
     out_q = mp.Queue()
@@ -36,9 +36,9 @@ def spea2_main_loop(params: dict):
             p.join()
 
         # update the main data store
-        for eval_type, seq_n_score in result.items():
-            for seq, score in seq_n_score.items():
-                params['population'][seq][eval_type] = score
+        for eval_type, id_score in result.items():
+            for seq_id, score in id_score.items():
+                params['population'][seq_id][eval_type] = score
 
         # calculate fitness
         calculate_fitness(params['population'])

@@ -11,6 +11,7 @@ from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.den
     __DENSITY_KEY__
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.domination import calculate_raw_fitness, \
     __RAW_FITNESS_KEY__
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations as mut
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import \
     find_num_differences, get_number_of_repeats_from_dict, find_repeats, find_number_of_overlapping_repeats, \
     find_number_of_non_overlapping_repeats, find_separated_palindromes
@@ -35,6 +36,7 @@ __FITNESS_KEY__ = 'fitness'
 
 def calculate_fitness(population: dict):
     """
+    TODO: Multiprocessing
     Calculates final fitness
     Fitness = Raw fitness + density
     :param population:
@@ -42,21 +44,21 @@ def calculate_fitness(population: dict):
     """
     calculate_raw_fitness(population)
     calculate_density(population)
-    for sequence in population:
-        population[sequence][__FITNESS_KEY__] = population[sequence][__RAW_FITNESS_KEY__] + \
-                                                population[sequence][__DENSITY_KEY__]
+    for seq_id in population:
+        population[seq_id][__FITNESS_KEY__] = population[seq_id][__RAW_FITNESS_KEY__] + \
+                                                population[seq_id][__DENSITY_KEY__]
 
 
 # Specific fitness
 
 def eval_host(params: dict, out_q: Queue) -> None:
     out = {__SCORE_HOST__: {}}
-    for sequence in params['population'].keys():
+    for seq_id in params['population'].keys():
         score = find_num_differences(
-            sequence,
+            params['population'][seq_id][mut.__SEQUENCE_KEY__],
             params['codon_opt_seq']
         )
-        out[__SCORE_HOST__][sequence] = [score]
+        out[__SCORE_HOST__][seq_id] = [score]
     out_q.put(out)
     return
 
@@ -67,40 +69,56 @@ def find_restriction_sites(restriction_batch: RestrictionBatch, sequence: Seq, l
 
 def eval_restriction_sites(params: dict, out_q: Queue) -> None:
     out = {__SCORE_RESTRICTION__: {}}
-    for sequence in params['population'].keys():
+    for seq_id in params['population'].keys():
         rest_sites = find_restriction_sites(
             params['restriction_sites'],
-            Seq(sequence, IUPAC.unambiguous_dna),
+            Seq(
+                params['population'][seq_id][mut.__SEQUENCE_KEY__],
+                IUPAC.unambiguous_dna
+            ),
             params['linear']
         )
         score = [0, list(rest_sites.values())]
         for sites in rest_sites.values():
             score[0] += len(sites)
-        out[__SCORE_RESTRICTION__][sequence] = score
+        out[__SCORE_RESTRICTION__][seq_id] = score
     out_q.put(out)
     return
 
 
 def eval_repeats(params: dict, out_q: Queue) -> None:
     out = {__SCORE_REPEATS__: {}}
-    for sequence in params['population'].keys():
+    for seq_id in params['population'].keys():
         if params['locations']:
-            locations = find_repeats(sequence, params['repeat_size'], params['overlapping'])
+            locations = find_repeats(
+                params['population'][seq_id][mut.__SEQUENCE_KEY__],
+                params['repeat_size'],
+                params['overlapping']
+            )
             score = [get_number_of_repeats_from_dict(locations), locations]
         else:
             if params['overlapping']:
-                score = [find_number_of_overlapping_repeats(sequence, params['repeat_size'])]
+                score = [find_number_of_overlapping_repeats(
+                    params['population'][seq_id][mut.__SEQUENCE_KEY__],
+                    params['repeat_size']
+                )]
             else:
-                score = [find_number_of_non_overlapping_repeats(sequence, params['repeat_size'])]
-        out[__SCORE_REPEATS__][sequence] = score
+                score = [find_number_of_non_overlapping_repeats(
+                    params['population'][seq_id][mut.__SEQUENCE_KEY__],
+                    params['repeat_size']
+                )]
+        out[__SCORE_REPEATS__][seq_id] = score
     out_q.put(out)
     return
 
 
 def eval_homopolymers(params: dict, out_q: Queue) -> None:
     out = {__SCORE_HOMOPOLYMERS__: {}}
-    for sequence in params['population'].keys():
-        repeat_and_locations = find_repeats(sequence, params['homopolymer_size'], overlapping=True)
+    for seq_id in params['population'].keys():
+        repeat_and_locations = find_repeats(
+            params['population'][seq_id][mut.__SEQUENCE_KEY__],
+            params['homopolymer_size'], overlapping=True
+        )
         # remove repeats with multiple letters
         locations = {}
         score = 0
@@ -109,7 +127,7 @@ def eval_homopolymers(params: dict, out_q: Queue) -> None:
                 if params['locations']:
                     locations[k] = v
                 score += len(v)
-        out[__SCORE_HOMOPOLYMERS__][sequence] = [score, locations]
+        out[__SCORE_HOMOPOLYMERS__][seq_id] = [score, locations]
     out_q.put(out)
     return
 
@@ -129,10 +147,10 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
     if params['shortest_loop_length'] < 3:
         raise AttributeError("Loop cannot be smaller than 3 (bio rules)")
     if params['longest_loop_length'] > 30:
-        print("loop likely to be too unstable to exist without extra features inside")
-    for sequence in params['population'].keys():
+        logging.warning("loop likely to be too unstable to exist without extra features inside")
+    for seq_id in params['population'].keys():
         palindrome_locations = find_separated_palindromes(
-            sequence,
+            params['population'][seq_id][mut.__SEQUENCE_KEY__],
             params['shortest_loop_length'],
             params['longest_loop_length'],
             params['stem_length']
@@ -141,7 +159,7 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
         score = 0
         for x in palindrome_locations.values():
             score += len(x)
-        out[__SCORE_HAIRPINS__][sequence] = [score, palindrome_locations]
+        out[__SCORE_HAIRPINS__][seq_id] = [score, palindrome_locations]
     out_q.put(out)
     return
 
@@ -176,9 +194,12 @@ def eval_gc(params: dict, out_q: Queue) -> None:
             not isinstance(params['gc_parameters']['max'], float) or \
             not isinstance(params['gc_parameters']['window_size'], int):
         raise AttributeError("gc_params should contain float low%, float high%, int window size")
-    for sequence in params['population'].keys():
+    for seq_id in params['population'].keys():
         score = 0
-        gc_results = get_windowed_gc(sequence, params['gc_parameters']['window_size'])
+        gc_results = get_windowed_gc(
+            params['population'][seq_id][mut.__SEQUENCE_KEY__],
+            params['gc_parameters']['window_size']
+        )
         for result in gc_results:
             if result < params['gc_parameters']['min']:
                 logging.debug(
@@ -195,7 +216,7 @@ def eval_gc(params: dict, out_q: Queue) -> None:
                         result
                     )
                 )
-        out[__SCORE_GC__][sequence] = [score, gc_results]
+        out[__SCORE_GC__][seq_id] = [score, gc_results]
     out_q.put(out)
     return
 

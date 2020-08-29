@@ -27,22 +27,22 @@ def find_dominated_solutions(population: dict) -> dict:
     # test all pairs to see if they get dominated O(dn^2)
     left_x_right = {}
     visited = set()
-    for seq1 in population.keys():
-        for seq2 in population.keys():
+    for seq_id1 in population.keys():
+        for seq_id2 in population.keys():
             # prevent key errors
-            if seq1 not in left_x_right:
-                left_x_right[seq1] = {seq2: __NEITHER_EQUAL_CASE__}
-            if seq2 not in left_x_right:
-                left_x_right[seq2] = {seq1: __NEITHER_EQUAL_CASE__}
+            if seq_id1 not in left_x_right:
+                left_x_right[seq_id1] = {seq_id2: __NEITHER_EQUAL_CASE__}
+            if seq_id2 not in left_x_right:
+                left_x_right[seq_id2] = {seq_id1: __NEITHER_EQUAL_CASE__}
 
-            if (seq1, seq2) not in visited:
-                left = population[seq1]
-                right = population[seq2]
-                left_x_right[seq1][seq2], left_x_right[seq2][seq1] = compare_two_solutions_for_dominance(
+            if (seq_id1, seq_id2) not in visited:
+                left = population[seq_id1]
+                right = population[seq_id2]
+                left_x_right[seq_id1][seq_id2], left_x_right[seq_id2][seq_id1] = compare_two_solutions_for_dominance(
                     left, right, fit_funcs.__SCORE_NAMES__
                 )
-                visited.add((seq1, seq2))
-                visited.add((seq2, seq1))
+                visited.add((seq_id1, seq_id2))
+                visited.add((seq_id2, seq_id1))
     return left_x_right
 
 
@@ -100,12 +100,12 @@ def calculate_strength(left_x_right: dict, population: dict) -> dict:
     :param population:
     :return: population but with proper domination values appended to dict
     """
-    for seq1, seq2_dict in left_x_right.items():
+    for seq_id1, seq2_dict in left_x_right.items():
         strength = 0
-        for seq2 in seq2_dict.keys():
-            if left_x_right[seq1][seq2] == __DOMINATES_CASE__:
+        for seq_id2 in seq2_dict.keys():
+            if left_x_right[seq_id1][seq_id2] == __DOMINATES_CASE__:
                 strength += 1
-        population[seq1][__STRENGTH_KEY__] = strength
+        population[seq_id1][__STRENGTH_KEY__] = strength
     return population
 
 
@@ -126,9 +126,9 @@ def parse_for_raw_fitness(left_x_right: dict, population: dict):
     :param population:
     :return: None, updates population
     """
-    for seq1, seq2_dict in left_x_right.items():
+    for seq_id1, seq2_dict in left_x_right.items():
         raw_fitness = 0
-        for seq2 in seq2_dict.keys():
-            if left_x_right[seq1][seq2] == __DOMINATED_CASE__:
-                raw_fitness += population[seq2][__STRENGTH_KEY__]
-        population[seq1][__RAW_FITNESS_KEY__] = raw_fitness
+        for seq_id2 in seq2_dict.keys():
+            if left_x_right[seq_id1][seq_id2] == __DOMINATED_CASE__:
+                raw_fitness += population[seq_id2][__STRENGTH_KEY__]
+        population[seq_id1][__RAW_FITNESS_KEY__] = raw_fitness

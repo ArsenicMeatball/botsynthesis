@@ -1,13 +1,12 @@
 import random
-import copy
+import uuid
+
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning, test_parameters
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.codon_optimization_host import \
-    determine_ideal_codon_optimized_sequence
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
+
+__SEQUENCE_KEY__ = 'sequence'
 
 
 def mutate_codon(sequence: Seq, codon_usage: dict, idx=0, translation_dict: dict = None):
@@ -58,17 +57,21 @@ def mutate_seq(sequence: Seq, param: dict) -> Seq:
     return Seq(new_sequence, IUPAC.unambiguous_dna)
 
 
-def initialize_population(algorithm_parameters: dict) -> dict:
+def initialize_population(algorithm_parameters: dict) -> tuple:
     """
         create population of mutants based on the codon optimized sequence
     :param algorithm_parameters: dict containing the parameters for the SPEA2 algorithm
-    :return: dict representing the population
+    :return: tuple(dict representing the population, set representing the sequences in the population)
     """
     population = {}
+    sequences = set()
     while len(population) < algorithm_parameters['population_size']:
-        population[str(mutate_seq(algorithm_parameters['codon_opt_seq'], algorithm_parameters))] = {}
-        # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    return population
+        seq = str(mutate_seq(algorithm_parameters['codon_opt_seq'], algorithm_parameters))
+        if seq not in sequences:
+            sequences.add(seq)
+            seq_id = uuid.uuid4()
+            population[seq_id] = {__SEQUENCE_KEY__: seq}
+    return population, sequences
 
 
 if __name__ == '__main__':
