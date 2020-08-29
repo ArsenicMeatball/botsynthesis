@@ -1,15 +1,8 @@
 import multiprocessing as mp
 
-from Bio.Alphabet import IUPAC
-from Bio.Seq import Seq
-
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning, test_parameters
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.codon_optimization_host import \
-    determine_ideal_codon_optimized_sequence
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.domination import find_dominated_solutions
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import fitness_evals
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import fitness_evals, \
+    calculate_fitness
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations import initialize_population
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
 
 
@@ -17,7 +10,6 @@ def spea2_main_loop(params: dict):
     # create population
     params['population'] = initialize_population(params)
     # main loop
-    generation = 0
     is_converged = False
     out_q = mp.Queue()
     for generation in range(params['generations']):
@@ -48,14 +40,13 @@ def spea2_main_loop(params: dict):
             for seq, score in seq_n_score.items():
                 params['population'][seq][eval_type] = score
 
-        # domination
-        total_population = find_dominated_solutions(params['population'])
+        # calculate fitness
+        calculate_fitness(params['population'])
 
-        for k, v in params['population'].items():
-            print(k)
-            for kk, vv in v.items():
-                print(kk, vv)
-        # fitness
+        for k1, kv in params['population'].items():
+            print('{0} :'.format(k1))
+            for k2, v in kv.items():
+                print(' {0} : {1}'.format(k2, v))
 
 
 if __name__ == '__main__':
