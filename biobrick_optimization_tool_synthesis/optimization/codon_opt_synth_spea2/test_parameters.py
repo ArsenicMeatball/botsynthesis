@@ -28,13 +28,13 @@ codon_usage = fetch_codon_table()
 codon_optimized = determine_ideal_codon_optimized_sequence(seq, codon_usage)
 restriction_sites = 'NdeI XhoI HpaI PstI EcoRV NcoI BamHI'
 algorithm_params = {
-    'population_size': 5,
-    'num_param_considered': 8,
+    'population_size': 25,
+    'max init population attempts': 25,
     'prot_seq': seq,
     'codon_opt_seq': codon_optimized,
     'codon_usage': codon_usage,
     'mutation_%': 5,
-    'archive_size': 2,
+    'archive size': 2,
     'crossover_%': 15,
     'linear': True,
     'gc_parameters': {
