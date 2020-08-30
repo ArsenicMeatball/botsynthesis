@@ -1,3 +1,4 @@
+import logging
 import random
 import uuid
 
@@ -65,12 +66,17 @@ def initialize_population(algorithm_parameters: dict) -> tuple:
     """
     population = {}
     sequences = set()
-    while len(population) < algorithm_parameters['population_size']:
+    attempts = 0
+    while len(population) < algorithm_parameters['population_size'] and \
+            attempts < algorithm_parameters['max init population attempts']:
         seq = str(mutate_seq(algorithm_parameters['codon_opt_seq'], algorithm_parameters))
         if seq not in sequences:
             sequences.add(seq)
             seq_id = uuid.uuid4()
             population[seq_id] = {__SEQUENCE_KEY__: seq}
+        else:
+            attempts += 1
+            logging.info('failed to create a new sequence')
     return population, sequences
 
 
