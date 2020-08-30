@@ -1,5 +1,6 @@
 import multiprocessing as mp
 
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.archive import build_archive
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import fitness_evals, \
     calculate_fitness
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations import initialize_population
@@ -43,7 +44,9 @@ def spea2_main_loop(params: dict):
         # calculate fitness
         calculate_fitness(params['population'])
 
-        for k1, kv in params['population'].items():
+        params['archive'] = build_archive(params['population'], params['archive size'])
+
+        for k1, kv in params['archive'].items():
             print('{0} :'.format(k1))
             for k2, v in kv.items():
                 print(' {0} : {1}'.format(k2, v))
