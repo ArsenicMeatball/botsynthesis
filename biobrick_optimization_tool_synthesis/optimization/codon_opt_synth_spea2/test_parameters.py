@@ -28,7 +28,7 @@ codon_usage = fetch_codon_table()
 codon_optimized = determine_ideal_codon_optimized_sequence(seq, codon_usage)
 restriction_sites = 'NdeI XhoI HpaI PstI EcoRV NcoI BamHI'
 algorithm_params = {
-    'population_size': 25,
+    'population_size': 5,
     'max init population attempts': 25,
     'prot_seq': seq,
     'codon_opt_seq': codon_optimized,

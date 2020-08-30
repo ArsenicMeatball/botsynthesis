@@ -1,3 +1,4 @@
+import logging
 import multiprocessing as mp
 
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.archive import build_archive
@@ -53,4 +54,5 @@ def spea2_main_loop(params: dict):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     spea2_main_loop(algorithm_params)

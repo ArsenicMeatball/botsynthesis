@@ -180,7 +180,7 @@ def get_windowed_gc(sequence: str, window: int) -> list:
         # convert to decimal
         gc_percent /= 100
         gc_results.append(gc_percent)
-        logging.debug('index {0}, percent {1}'.format(idx, gc_percent))
+
         if seq[idx:len(seq)] == sequence_window:
             break
     logging.debug(gc_results)
