@@ -80,23 +80,21 @@ def initialize_population(algorithm_parameters: dict) -> tuple:
     return population, sequences
 
 
-def tournament_selection(population: dict, n_ary: int = 2):
+def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
     """
-    Get winner of a tournament (key of winner)
+    Get winner of a tournament (key of winner) based on the fitness value
     :param n_ary: number of individuals to conduct tournament on, default = binary
     :param population: all the individuals we are selecting from
     :return: the key of the winner of tournament
     """
     if n_ary < 2:
         raise ValueError('tournament selection must be binary or larger, currently {0}'.format(n_ary))
-    tournament_individuals = []
     population_keys = list(population.keys())
-    for _ in range(n_ary):
+    key_of_minimum = population_keys[random.randint(0, len(population_keys))]
+    for _ in range(1, n_ary):
         idx = random.randint(0, len(population))
-        tournament_individuals.append(population_keys[idx])
-    # now choose the winner
-    key_of_minimum = population_keys[0]
-    for key in population_keys[1:]:
-        if population[key][fit_func.__FITNESS_KEY__] < population[key][fit_func.__FITNESS_KEY__]:
-            key_of_minimum = key
+        # TODO: make if statement more general, not just fitness value
+        if population[population_keys[idx]][fit_func.__FITNESS_KEY__] < \
+                population[key_of_minimum][fit_func.__FITNESS_KEY__]:
+            key_of_minimum = population_keys[idx]
     return key_of_minimum
