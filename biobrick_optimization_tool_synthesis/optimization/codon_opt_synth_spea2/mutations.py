@@ -1,3 +1,4 @@
+import copy
 import logging
 import random
 import uuid
@@ -98,3 +99,23 @@ def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
                 population[key_of_minimum][fit_func.__FITNESS_KEY__]:
             key_of_minimum = population_keys[idx]
     return key_of_minimum
+
+
+def generate_population_from_archive(archive: dict, population_size: int) -> dict:
+    """
+
+    :param archive:
+    :param population_size:
+    :return:
+    """
+    # don't touch archive
+    archive_copy = copy.deepcopy(archive)
+    mating_pool = {} if len(archive_copy) > population_size else archive_copy
+    if len(mating_pool) == 0:
+        while len(mating_pool) < population_size:
+            # binary tournament selection without replacement
+            key_to_add = tournament_selection_without_replacement(archive_copy, 2)
+            mating_pool[key_to_add] = archive_copy[key_to_add]
+    # mutate and recombine
+
+    return mating_pool
