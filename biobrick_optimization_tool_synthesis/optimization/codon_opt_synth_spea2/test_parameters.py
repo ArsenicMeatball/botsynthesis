@@ -29,15 +29,15 @@ codon_optimized = determine_ideal_codon_optimized_sequence(seq, codon_usage)
 restriction_sites = 'NdeI XhoI HpaI PstI EcoRV NcoI BamHI'
 percent_crossover = 3
 algorithm_params = {
-    'population size': 5,
+    'population size': 25,
     'max init population attempts': 25,
     'prot seq': seq,
     'codon opt seq': codon_optimized,
     'codon usage': codon_usage,
     'mutation %': 5,
     'crossover %': percent_crossover,
-    'archive size': 3,
-    'mating pool size': 3,
+    'archive size': 13,
+    'mating pool size': 10,
     'linear': True,
     'gc parameters': {
         'min': 0.1,
@@ -53,5 +53,5 @@ algorithm_params = {
     'shortest loop length': 3,
     'longest loop length': 9,
     'stem length': 10,
-    'num crossover sites': (float(percent_crossover) / 100) * len(codon_optimized),
+    'num crossover sites': int((float(percent_crossover) / 100) * len(codon_optimized)),
 }

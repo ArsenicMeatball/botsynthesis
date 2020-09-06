@@ -20,15 +20,23 @@ def mutate_codon(sequence: str, codon_usage: dict, idx=0, translation_dict: dict
     :param translation_dict:
     :return:
     """
-
+    if len(sequence) == 0:
+        raise ValueError('Sequence is empty')
     codon = str(sequence[idx:idx + 3])
+    if len(codon) != 3:
+        logging.warning('Codon {0} is not of size 3'.format(codon))
+        return codon
     amino = Seq(codon, IUPAC.unambiguous_dna).translate()
     if translation_dict is not None:
         amino = Seq(codon, IUPAC.unambiguous_dna).translate(translation_dict)
+    try:
+        x = codon_usage[amino]
+    except Exception:
+        raise Exception('amino {0}\ncodon {1}\nsequence {2}'.format(amino, codon, sequence))
     if len(codon_usage[amino]) < 1:
         raise Exception(
-            'amino acid recovered is not compatible with codon usage table given. \n'
-            'please provide a translation table compatible with the codon_usage table'
+            'amino acid recovered ({0}) is not compatible with codon usage table given. \n'
+            'please provide a translation table compatible with the codon_usage table'.format(amino)
         )
 
     new_codon = random.choice(list(codon_usage[amino].keys()))
@@ -46,6 +54,9 @@ def mutate_seq(sequence: str, param: dict) -> str:
     :param param:
     :return:
     """
+    # print(len(sequence))
+    if sequence == '':
+        raise ValueError('Sequence is empty')
     new_sequence = ''
     for idx in range(0, len(sequence), 3):
         # either add the og codon or mutated boy
@@ -55,7 +66,6 @@ def mutate_seq(sequence: str, param: dict) -> str:
             else str(mutate_codon(sequence, param['codon usage'], idx))
         )
         # print('Current sequence: ', new_sequence)
-
     return new_sequence
 
 
@@ -91,9 +101,9 @@ def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
     if n_ary < 2:
         raise ValueError('tournament selection must be binary or larger, currently {0}'.format(n_ary))
     population_keys = list(population.keys())
-    key_of_minimum = population_keys[random.randint(0, len(population_keys))]
+    key_of_minimum = population_keys[random.randint(0, len(population_keys)) - 1]
     for _ in range(1, n_ary):
-        idx = random.randint(0, len(population))
+        idx = random.randint(0, len(population) - 1)
         # TODO: make if statement more general, not just fitness value
         if population[population_keys[idx]][fit_func.__FITNESS_KEY__] < \
                 population[key_of_minimum][fit_func.__FITNESS_KEY__]:
@@ -102,10 +112,12 @@ def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
 
 
 def generate_mating_pool_from_archive(archive: dict, mating_pool_size: int) -> dict:
+    if len(archive) == 0:
+        raise ValueError('archive cannot be empty')
     if mating_pool_size >= len(archive):
         return archive
     mating_pool = {}
-    while len(archive) < mating_pool_size:
+    while len(mating_pool) < mating_pool_size:
         key_to_add = tournament_selection_without_replacement(archive, 2)
         mating_pool[key_to_add] = archive[key_to_add]
     return mating_pool
@@ -120,14 +132,29 @@ def recombine(sequence1: str, sequence2: str, number_of_sites: int) -> str:
     current_sequence = sequence1
     last_pos = 0
     new_seq = ''
+    chunks = []
     for site in crossover_sites:
-        new_seq.join(current_sequence[last_pos:site])
+        chunks.append(current_sequence[last_pos:site])
         current_sequence = sequence1 if current_sequence == sequence2 else sequence2
         last_pos = site
+    # add the last bit
+    chunks.append(current_sequence[last_pos:])
+    # add them all together
+    new_seq = new_seq.join(chunks)
+    if len(new_seq) != len(sequence1):
+        raise ValueError(
+            'Recombined sequence {0} is not the same size as its ancestor {1}\nBuilt from chunks {2}\nParents:\n{3}\n{4}'.format(
+                len(new_seq),
+                len(sequence1),
+                chunks,
+                sequence1,
+                sequence2,
+            )
+        )
     return new_seq
 
 
-def generate_population_from_archive(params: dict) -> dict:
+def generate_population_from_archive(params: dict) -> tuple:
     """
 
     :param params: dict that contains:
@@ -148,17 +175,23 @@ def generate_population_from_archive(params: dict) -> dict:
     #       run child under mutations
     new_population = {}
     mating_pool_keys = list(mating_pool.keys())
-
-    while len(new_population) < params['population_size']:
-        idx1 = random.randint(0, len(mating_pool_keys))
-        idx2 = random.randint(0, len(mating_pool_keys))
+    sequences_set = set()
+    attempts = 0
+    max_attempts = 2 * params['population size']
+    while len(new_population) < params['population size'] and attempts < max_attempts:
+        idx1 = random.randint(0, len(mating_pool_keys) - 1)
+        idx2 = random.randint(0, len(mating_pool_keys) - 1)
         if idx1 != idx2:
             parent_a = mating_pool[mating_pool_keys[idx1]]
             parent_b = mating_pool[mating_pool_keys[idx2]]
             child_seq = recombine(parent_a[__SEQUENCE_KEY__], parent_b[__SEQUENCE_KEY__], params['num crossover sites'])
-            child = {__SEQUENCE_KEY__: child_seq}
         else:
-            child = mating_pool[mating_pool_keys[idx1]]
-        child = mutate_seq(child, params)
-        new_population[uuid.uuid4()] = child
-    return new_population
+            child_seq = mating_pool[mating_pool_keys[idx1]][__SEQUENCE_KEY__]
+        child_seq = mutate_seq(child_seq, params)
+        if child_seq not in sequences_set:
+            sequences_set.add(child_seq)
+            child = {__SEQUENCE_KEY__: child_seq}
+            new_population[uuid.uuid4()] = child
+        else:
+            attempts += 1
+    return new_population, sequences_set
