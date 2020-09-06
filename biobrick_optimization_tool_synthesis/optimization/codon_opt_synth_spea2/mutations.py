@@ -11,7 +11,7 @@ import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.f
 __SEQUENCE_KEY__ = 'sequence'
 
 
-def mutate_codon(sequence: Seq, codon_usage: dict, idx=0, translation_dict: dict = None):
+def mutate_codon(sequence: str, codon_usage: dict, idx=0, translation_dict: dict = None):
     """
 
     :param sequence:
@@ -39,7 +39,7 @@ def mutate_codon(sequence: Seq, codon_usage: dict, idx=0, translation_dict: dict
     return new_codon
 
 
-def mutate_seq(sequence: Seq, param: dict) -> Seq:
+def mutate_seq(sequence: str, param: dict) -> str:
     """
         mutate a DNA Seq based on the mutation probability, returns a different DNA Seq
     :param sequence:
@@ -51,12 +51,12 @@ def mutate_seq(sequence: Seq, param: dict) -> Seq:
         # either add the og codon or mutated boy
         new_sequence += (
             str(sequence[idx:idx + 3])
-            if random.randint(1, 100) > param['mutation_%']
-            else str(mutate_codon(sequence, param['codon_usage'], idx))
+            if random.randint(1, 100) > param['mutation %']
+            else str(mutate_codon(sequence, param['codon usage'], idx))
         )
         # print('Current sequence: ', new_sequence)
 
-    return Seq(new_sequence, IUPAC.unambiguous_dna)
+    return new_sequence
 
 
 def initialize_population(algorithm_parameters: dict) -> tuple:
@@ -68,9 +68,9 @@ def initialize_population(algorithm_parameters: dict) -> tuple:
     population = {}
     sequences = set()
     attempts = 0
-    while len(population) < algorithm_parameters['population_size'] and \
+    while len(population) < algorithm_parameters['population size'] and \
             attempts < algorithm_parameters['max init population attempts']:
-        seq = str(mutate_seq(algorithm_parameters['codon_opt_seq'], algorithm_parameters))
+        seq = mutate_seq(algorithm_parameters['codon opt seq'], algorithm_parameters)
         if seq not in sequences:
             sequences.add(seq)
             seq_id = uuid.uuid4()
@@ -101,21 +101,64 @@ def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
     return key_of_minimum
 
 
-def generate_population_from_archive(archive: dict, population_size: int) -> dict:
+def generate_mating_pool_from_archive(archive: dict, mating_pool_size: int) -> dict:
+    if mating_pool_size >= len(archive):
+        return archive
+    mating_pool = {}
+    while len(archive) < mating_pool_size:
+        key_to_add = tournament_selection_without_replacement(archive, 2)
+        mating_pool[key_to_add] = archive[key_to_add]
+    return mating_pool
+
+
+def recombine(sequence1: str, sequence2: str, number_of_sites: int) -> str:
+    # random positions with no duplicates
+    crossover_sites = {random.randint(0, len(sequence1)) for _ in range(number_of_sites)}
+    crossover_sites = list(crossover_sites)
+    crossover_sites.sort()
+    # assuming sequences are randomly chosen, it is ok to pick 1 to go first
+    current_sequence = sequence1
+    last_pos = 0
+    new_seq = ''
+    for site in crossover_sites:
+        new_seq.join(current_sequence[last_pos:site])
+        current_sequence = sequence1 if current_sequence == sequence2 else sequence2
+        last_pos = site
+    return new_seq
+
+
+def generate_population_from_archive(params: dict) -> dict:
     """
 
-    :param archive:
-    :param population_size:
+    :param params: dict that contains:
+        archive: dict which contains the sequences
+        population size: int which tells the size of final population
+        num crossover sites: int
+        mutation %: int for percent mutation chance
+        codon usage: dict to know the mapping of different codons
     :return:
     """
     # don't touch archive
-    archive_copy = copy.deepcopy(archive)
-    mating_pool = {} if len(archive_copy) > population_size else archive_copy
-    if len(mating_pool) == 0:
-        while len(mating_pool) < population_size:
-            # binary tournament selection without replacement
-            key_to_add = tournament_selection_without_replacement(archive_copy, 2)
-            mating_pool[key_to_add] = archive_copy[key_to_add]
-    # mutate and recombine
+    archive_copy = copy.deepcopy(params['archive'])
+    # create mating pool from subset of archive
+    mating_pool = generate_mating_pool_from_archive(archive_copy, params['mating pool size'])
+    # until population is full
+    #   choose 2 randomly selected individuals in mating pool
+    #       apply recombination to create a new child
+    #       run child under mutations
+    new_population = {}
+    mating_pool_keys = list(mating_pool.keys())
 
-    return mating_pool
+    while len(new_population) < params['population_size']:
+        idx1 = random.randint(0, len(mating_pool_keys))
+        idx2 = random.randint(0, len(mating_pool_keys))
+        if idx1 != idx2:
+            parent_a = mating_pool[mating_pool_keys[idx1]]
+            parent_b = mating_pool[mating_pool_keys[idx2]]
+            child_seq = recombine(parent_a[__SEQUENCE_KEY__], parent_b[__SEQUENCE_KEY__], params['num crossover sites'])
+            child = {__SEQUENCE_KEY__: child_seq}
+        else:
+            child = mating_pool[mating_pool_keys[idx1]]
+        child = mutate_seq(child, params)
+        new_population[uuid.uuid4()] = child
+    return new_population
