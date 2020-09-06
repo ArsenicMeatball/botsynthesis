@@ -56,7 +56,7 @@ def eval_host(params: dict, out_q: Queue) -> None:
     for seq_id in params['population'].keys():
         score = find_num_differences(
             params['population'][seq_id][mut.__SEQUENCE_KEY__],
-            params['codon_opt_seq']
+            params['codon opt seq']
         )
         out[__SCORE_HOST__][seq_id] = [score]
     out_q.put(out)
@@ -71,7 +71,7 @@ def eval_restriction_sites(params: dict, out_q: Queue) -> None:
     out = {__SCORE_RESTRICTION__: {}}
     for seq_id in params['population'].keys():
         rest_sites = find_restriction_sites(
-            params['restriction_sites'],
+            params['restriction sites'],
             Seq(
                 params['population'][seq_id][mut.__SEQUENCE_KEY__],
                 IUPAC.unambiguous_dna
@@ -92,7 +92,7 @@ def eval_repeats(params: dict, out_q: Queue) -> None:
         if params['locations']:
             locations = find_repeats(
                 params['population'][seq_id][mut.__SEQUENCE_KEY__],
-                params['repeat_size'],
+                params['repeat size'],
                 params['overlapping']
             )
             score = [get_number_of_repeats_from_dict(locations), locations]
@@ -100,12 +100,12 @@ def eval_repeats(params: dict, out_q: Queue) -> None:
             if params['overlapping']:
                 score = [find_number_of_overlapping_repeats(
                     params['population'][seq_id][mut.__SEQUENCE_KEY__],
-                    params['repeat_size']
+                    params['repeat size']
                 )]
             else:
                 score = [find_number_of_non_overlapping_repeats(
                     params['population'][seq_id][mut.__SEQUENCE_KEY__],
-                    params['repeat_size']
+                    params['repeat size']
                 )]
         out[__SCORE_REPEATS__][seq_id] = score
     out_q.put(out)
@@ -117,7 +117,7 @@ def eval_homopolymers(params: dict, out_q: Queue) -> None:
     for seq_id in params['population'].keys():
         repeat_and_locations = find_repeats(
             params['population'][seq_id][mut.__SEQUENCE_KEY__],
-            params['homopolymer_size'], overlapping=True
+            params['homopolymer size'], overlapping=True
         )
         # remove repeats with multiple letters
         locations = {}
@@ -144,16 +144,16 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
     then keep checking until stem length of 10result = {separation: set()}
     """
     out = {__SCORE_HAIRPINS__: {}}
-    if params['shortest_loop_length'] < 3:
+    if params['shortest loop length'] < 3:
         raise AttributeError("Loop cannot be smaller than 3 (bio rules)")
-    if params['longest_loop_length'] > 30:
+    if params['longest loop length'] > 30:
         logging.warning("loop likely to be too unstable to exist without extra features inside")
     for seq_id in params['population'].keys():
         palindrome_locations = find_separated_palindromes(
             params['population'][seq_id][mut.__SEQUENCE_KEY__],
-            params['shortest_loop_length'],
-            params['longest_loop_length'],
-            params['stem_length']
+            params['shortest loop length'],
+            params['longest loop length'],
+            params['stem length']
         )
         logging.debug(palindrome_locations)
         score = 0
@@ -189,30 +189,30 @@ def get_windowed_gc(sequence: str, window: int) -> list:
 
 def eval_gc(params: dict, out_q: Queue) -> None:
     out = {__SCORE_GC__: {}}
-    if len(params['gc_parameters']) != 3 or \
-            not isinstance(params['gc_parameters']['min'], float) or \
-            not isinstance(params['gc_parameters']['max'], float) or \
-            not isinstance(params['gc_parameters']['window_size'], int):
-        raise AttributeError("gc_params should contain float low%, float high%, int window size")
+    if len(params['gc parameters']) != 3 or \
+            not isinstance(params['gc parameters']['min'], float) or \
+            not isinstance(params['gc parameters']['max'], float) or \
+            not isinstance(params['gc parameters']['window size'], int):
+        raise AttributeError("gc params should contain float low%, float high%, int window size")
     for seq_id in params['population'].keys():
         score = 0
         gc_results = get_windowed_gc(
             params['population'][seq_id][mut.__SEQUENCE_KEY__],
-            params['gc_parameters']['window_size']
+            params['gc parameters']['window size']
         )
         for result in gc_results:
-            if result < params['gc_parameters']['min']:
+            if result < params['gc parameters']['min']:
                 logging.debug(
                     'min {0}, actual {1}, was found to be low'.format(
-                        params['gc_parameters']['min'],
+                        params['gc parameters']['min'],
                         result
                     )
                 )
-            elif result > params['gc_parameters']['max']:
+            elif result > params['gc parameters']['max']:
                 score += 1
                 logging.debug(
                     'max {0}, actual {1}, was found to be high'.format(
-                        params['gc_parameters']['max'],
+                        params['gc parameters']['max'],
                         result
                     )
                 )
