@@ -202,6 +202,7 @@ def eval_gc(params: dict, out_q: Queue) -> None:
         )
         for result in gc_results:
             if result < params['gc parameters']['min']:
+                score += 1
                 logging.debug(
                     'min {0}, actual {1}, was found to be low'.format(
                         params['gc parameters']['min'],
