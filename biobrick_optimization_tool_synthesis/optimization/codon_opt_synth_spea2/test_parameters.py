@@ -29,22 +29,22 @@ codon_optimized = determine_ideal_codon_optimized_sequence(seq, codon_usage)
 restriction_sites = 'NdeI XhoI HpaI PstI EcoRV NcoI BamHI'
 percent_crossover = 3
 algorithm_params = {
-    'population size': 25,
+    'population size': 100,
     'max init population attempts': 25,
     'prot seq': seq,
     'codon opt seq': codon_optimized,
     'codon usage': codon_usage,
     'mutation %': 5,
     'crossover %': percent_crossover,
-    'archive size': 13,
-    'mating pool size': 10,
+    'archive size': 75,
+    'mating pool size': 50,
     'linear': True,
     'gc parameters': {
         'min': 0.1,
         'max': 0.68,
         'window size': 20
     },
-    'generations': 1,
+    'generations': 100,
     'restriction sites': get_rest_enzymes_from_string(restriction_sites),
     'overlapping': True,
     'locations': True,

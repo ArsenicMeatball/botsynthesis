@@ -9,9 +9,17 @@ from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mut
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
 
 
-def spea2_main_loop(params: dict):
+def spea2_main_loop(params: dict) -> dict:
+    """
+    Main loop of spea2 algorithm
+    https://pdfs.semanticscholar.org/6672/8d01f9ebd0446ab346a855a44d2b138fd82d.pdf
+    Considered one of, if not the best Multi-objective optimization algorithm for highly dimensional problems.
+    :param params: dict containing everything necessary to run the program
+    :return: dict containing the final archive
+    """
     # create population
-    params['population'], sequences_set = initialize_population(params)
+    params['population'] = initialize_population(params)
+    archive_sequences_per_gen = {}
     # main loop
     is_converged = False
     out_q = mp.Queue()
@@ -21,9 +29,9 @@ def spea2_main_loop(params: dict):
             break
         # multiprocessing check fitness
         processes = []
-        for func in fitness_evals:
+        for fitness_eval in fitness_evals:
             process = mp.Process(
-                target=func,
+                target=fitness_eval,
                 args=(params, out_q)
             )
             processes.append(process)
@@ -45,15 +53,14 @@ def spea2_main_loop(params: dict):
 
         # calculate fitness
         calculate_fitness(params['population'])
+        # build archive
         params['archive'] = build_archive(params['population'], params['archive size'])
-        params['population'], sequences_set = generate_population_from_archive(params)
-        print('final POPULATION')
-        # for k1, kv in params['population'].items():
-        #     print('{0} :'.format(k1))
-        #     for k2, v in kv.items():
-        #         print(' {0} : {1}'.format(k2, v))
+        # generate population of next generation
+        params['population'] = generate_population_from_archive(params)
+        print(generation)
+    return params['archive']
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
-    spea2_main_loop(algorithm_params)
+    result = spea2_main_loop(algorithm_params)

@@ -69,11 +69,11 @@ def mutate_seq(sequence: str, param: dict) -> str:
     return new_sequence
 
 
-def initialize_population(algorithm_parameters: dict) -> tuple:
+def initialize_population(algorithm_parameters: dict) -> dict:
     """
         create population of mutants based on the codon optimized sequence
     :param algorithm_parameters: dict containing the parameters for the SPEA2 algorithm
-    :return: tuple(dict representing the population, set representing the sequences in the population)
+    :return: dict representing the population
     """
     population = {}
     sequences = set()
@@ -88,7 +88,7 @@ def initialize_population(algorithm_parameters: dict) -> tuple:
         else:
             attempts += 1
             logging.info('failed to create a new sequence')
-    return population, sequences
+    return population
 
 
 def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
@@ -154,7 +154,7 @@ def recombine(sequence1: str, sequence2: str, number_of_sites: int) -> str:
     return new_seq
 
 
-def generate_population_from_archive(params: dict) -> tuple:
+def generate_population_from_archive(params: dict) -> dict:
     """
 
     :param params: dict that contains:
@@ -194,4 +194,4 @@ def generate_population_from_archive(params: dict) -> tuple:
             new_population[uuid.uuid4()] = child
         else:
             attempts += 1
-    return new_population, sequences_set
+    return new_population
