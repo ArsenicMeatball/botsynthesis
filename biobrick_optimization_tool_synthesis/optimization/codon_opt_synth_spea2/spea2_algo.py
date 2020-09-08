@@ -2,8 +2,7 @@ import logging
 import multiprocessing as mp
 
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.archive import build_archive
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions import fitness_evals, \
-    calculate_fitness
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_func
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations import initialize_population, \
     generate_population_from_archive
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
@@ -29,7 +28,7 @@ def spea2_main_loop(params: dict) -> dict:
             break
         # multiprocessing check fitness
         processes = []
-        for fitness_eval in fitness_evals:
+        for fitness_eval in fit_func.fitness_evals:
             process = mp.Process(
                 target=fitness_eval,
                 args=(params, out_q)
@@ -52,9 +51,9 @@ def spea2_main_loop(params: dict) -> dict:
                 params['population'][seq_id][eval_type] = score
 
         # calculate fitness
-        calculate_fitness(params['population'])
+        fit_func.calculate_fitness(params['population'])
         # build archive
-        params['archive'] = build_archive(params['population'], params['archive size'])
+        params['archive'] = build_archive(params['population'], params['archive size'], fit_func.__FITNESS_KEY__)
         # generate population of next generation
         params['population'] = generate_population_from_archive(params)
         print(generation)
