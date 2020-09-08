@@ -20,30 +20,21 @@ def mutate_codon(sequence: str, codon_usage: dict, idx=0, translation_dict: dict
     :param translation_dict:
     :return:
     """
-    if len(sequence) == 0:
-        raise ValueError('Sequence is empty')
     codon = str(sequence[idx:idx + 3])
     if len(codon) != 3:
         logging.warning('Codon {0} is not of size 3'.format(codon))
         return codon
-    amino = Seq(codon, IUPAC.unambiguous_dna).translate()
-    if translation_dict is not None:
-        amino = Seq(codon, IUPAC.unambiguous_dna).translate(translation_dict)
-    try:
-        x = codon_usage[amino]
-    except Exception:
-        raise Exception('amino {0}\ncodon {1}\nsequence {2}'.format(amino, codon, sequence))
+    amino = Seq(codon, IUPAC.unambiguous_dna).translate() if translation_dict is None \
+        else Seq(codon, IUPAC.unambiguous_dna).translate(translation_dict)
     if len(codon_usage[amino]) < 1:
         raise Exception(
-            'amino acid recovered ({0}) is not compatible with codon usage table given. \n'
-            'please provide a translation table compatible with the codon_usage table'.format(amino)
+            'Amino acid recovered ({0}) is not compatible with codon usage table {1} given. \n'
+            'Please provide a translation table compatible with the codon_usage table'.format(amino, codon_usage)
         )
-
     new_codon = random.choice(list(codon_usage[amino].keys()))
-    if len(codon_usage[amino]) > 1:
-        while new_codon == codon:  # if the same try again for higher chance of actual mutation
-            new_codon = random.choice(list(codon_usage[amino].keys()))
-            # print('New codon: ', new_codon)
+    if new_codon == codon and len(codon_usage[amino]) > 1:
+        # try again once
+        new_codon = random.choice(list(codon_usage[amino].keys()))
     return new_codon
 
 
@@ -54,10 +45,11 @@ def mutate_seq(sequence: str, param: dict) -> str:
     :param param:
     :return:
     """
-    # print(len(sequence))
     if sequence == '':
         raise ValueError('Sequence is empty')
     new_sequence = ''
+    logging.debug('Mutation % {0}, Codon Usage {1}, Unmutated Sequence {2}'.format(
+        param['mutation %'], param['codon usage'], sequence))
     for idx in range(0, len(sequence), 3):
         # either add the og codon or mutated boy
         new_sequence += (
@@ -65,7 +57,7 @@ def mutate_seq(sequence: str, param: dict) -> str:
             if random.randint(1, 100) > param['mutation %']
             else str(mutate_codon(sequence, param['codon usage'], idx))
         )
-        # print('Current sequence: ', new_sequence)
+    logging.debug('Mutated sequence {0}'.format(new_sequence))
     return new_sequence
 
 
@@ -87,7 +79,7 @@ def initialize_population(algorithm_parameters: dict) -> dict:
             population[seq_id] = {__SEQUENCE_KEY__: seq}
         else:
             attempts += 1
-            logging.info('failed to create a new sequence')
+            logging.debug('failed to create a "new" sequence')
     return population
 
 
