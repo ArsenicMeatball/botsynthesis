@@ -56,6 +56,8 @@ def truncate_archive(archive: dict, archive_size: int, sort_key: str):
     :param sort_key: key by which to sort the population
     :return: None, just updates archive
     """
+    if archive_size > archive_size:
+        logging.warning('Supplied ')
     logging.info('truncating worst non-dominated members from archive')
     sorted_keys = sorted(archive.keys(), key=lambda x: archive[x][sort_key])
     while len(archive) > archive_size:
