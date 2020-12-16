@@ -1,8 +1,8 @@
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tests import test_parameters
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
+# from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning
+# from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tests import test_parameters
+# from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
 
 
 def determine_ideal_codon_optimized_sequence(sequence: Seq, codon_usage: dict) -> Seq:
@@ -15,7 +15,7 @@ def determine_ideal_codon_optimized_sequence(sequence: Seq, codon_usage: dict) -
     # requires amino acid sequence and a dict mapping amino acids to codons
 
     if sequence.alphabet is not IUPAC.protein:
-        raise Exception("Incorrect alphabet, must be IUPAC.protein")
+        raise ValueError("Incorrect alphabet, must be IUPAC.protein")
 
     codon_optimized_sequence = ""
     for amino_acid in sequence:
@@ -24,8 +24,9 @@ def determine_ideal_codon_optimized_sequence(sequence: Seq, codon_usage: dict) -
 
 
 if __name__ == '__main__':
-    sequence = Seq(cleaning.clean_sequence(test_parameters.valid_protein), IUPAC.protein)
-    codon_usage = fetch_codon_table()
-    codon_optimized = determine_ideal_codon_optimized_sequence(sequence, codon_usage)
-    print(codon_usage)
-    print(codon_optimized)
+    pass
+    # sequence = Seq(cleaning.clean_sequence(test_parameters.valid_protein), IUPAC.protein)
+    # codon_usage = fetch_codon_table()
+    # codon_optimized = determine_ideal_codon_optimized_sequence(sequence, codon_usage)
+    # print(codon_usage)
+    # print(codon_optimized)
