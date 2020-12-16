@@ -1,6 +1,7 @@
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import test_parameters, cleaning
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import cleaning
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tests import test_parameters
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import fetch_codon_table
 
 

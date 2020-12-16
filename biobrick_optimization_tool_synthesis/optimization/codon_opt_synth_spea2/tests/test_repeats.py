@@ -1,7 +1,7 @@
 import unittest
 
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import *
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tests.test_parameters import algorithm_params
 
 
 class TestFindingRepeats(unittest.TestCase):

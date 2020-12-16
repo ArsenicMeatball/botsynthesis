@@ -33,7 +33,7 @@ def determine_sequence_type(sequence: str):
             return AA
         if is_dna:
             return DNA
-    return INDETERMINATE
+    return INDETERMINATE, [is_dna, is_aa, is_rna]
 
 
 def clean_sequence(sequence: str):
@@ -46,8 +46,8 @@ def turn_string_sequence_into_amino(sequence: str, sequence_type: str = ''):
         sequence_type = determine_sequence_type(sequence)
 
     # handle invalid sequence type stuff
-    if sequence_type == INDETERMINATE or sequence_type == INVALID:
-        raise Exception("Can't figure out the sequence type")
+    if sequence_type[0] == INDETERMINATE or sequence_type == INDETERMINATE or sequence_type == INVALID:
+        raise TypeError("Can't figure out the sequence type")
 
     # transform to a protein
     if sequence_type == RNA:

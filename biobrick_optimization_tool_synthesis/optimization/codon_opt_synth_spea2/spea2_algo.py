@@ -5,7 +5,7 @@ from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.arc
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_func
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations import initialize_population, \
     generate_population_from_archive
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.test_parameters import algorithm_params
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tests.test_parameters import algorithm_params
 # /home/arsenic/.cache/JetBrains/PyCharm2020.2/snapshots/BOTS_development1.pstat
 
 def spea2_main_loop(params: dict) -> dict:
