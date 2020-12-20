@@ -13,7 +13,7 @@ from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dom
     __RAW_FITNESS_KEY__
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations as mut
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import \
-    find_num_differences, get_number_of_repeats_from_dict, find_repeats, find_number_of_overlapping_repeats, \
+    find_num_differences, get_number_of_repeats_from_repeats_dict, find_repeats, find_number_of_overlapping_repeats, \
     find_number_of_non_overlapping_repeats, find_separated_palindromes
 
 # fitness function score name in dict
@@ -95,7 +95,7 @@ def eval_repeats(params: dict, out_q: Queue) -> None:
                 params['repeat size'],
                 params['overlapping']
             )
-            score = [get_number_of_repeats_from_dict(locations), locations]
+            score = [get_number_of_repeats_from_repeats_dict(locations), locations]
         else:
             if params['overlapping']:
                 score = [find_number_of_overlapping_repeats(

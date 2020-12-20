@@ -1,7 +1,8 @@
 import re
+import logging
 
 
-def get_number_of_repeats_from_dict(d: dict) -> int:
+def get_number_of_repeats_from_repeats_dict(d: dict) -> int:
     r = 0
     for v in d.values():
         r += len(v)
@@ -65,7 +66,20 @@ def find_separated_palindromes(string: str, min_separation_size: int = 3, max_se
                     else:
                         break
                 if counter == palindrome_size:
-                    result[separation] += [idx, idx + separation]
+                    # give the start, separation, and end
+                    result[separation] += [
+                        idx - palindrome_size + 1,
+                        string[idx + 1:idx + separation + 1],
+                        idx + separation + palindrome_size
+                    ]
+                    logging.debug('Palindrome (L | Sep | R): {} | {} | {}'.format(
+                        string[idx - palindrome_size + 1:idx + 1],
+                        string[idx + 1:idx + separation + 1],
+                        string[idx + separation + 1:idx + separation + palindrome_size + 1]
+                    ))
+        if result[separation] == list():
+            # remove if empty
+            result.pop(separation)
     return result
 
 
