@@ -14,7 +14,9 @@ def get_differences_dict_list(dict1: dict, dict2: dict) -> dict:
         if key not in dict2:
             result_dict[key] = dict1[key]
         else:
-            result_dict[key] = differences_between_two_lists(dict1[key], dict2[key])
+            only_differences = differences_between_two_lists(dict1[key], dict2[key])
+            if len(only_differences) > 0:
+                result_dict[key] = only_differences
     for key in dict2.keys():
         if key not in dict1:
             result_dict[key] = dict2[key]
@@ -25,6 +27,7 @@ def get_number_of_differences_dict_list(dict1: dict, dict2: dict) -> int:
     """
     Gets number of differences for a dict where the values are lists
     {'k':[list], 'k':[list]...}
+    empty dicts that exixst only on 1 side do not count
     :param dict1:
     :param dict2:
     :return: num differences
@@ -36,7 +39,7 @@ def get_number_of_differences_dict_list(dict1: dict, dict2: dict) -> int:
     return differences
 
 
-def find_key_n_minimum_value(d: dict) -> list:
+def find_keys_of_minimum_value(d: dict) -> list:
     """
     gets minimum value key(s)
     :param d: dict with values
