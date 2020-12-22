@@ -83,9 +83,12 @@ def initialize_population(algorithm_parameters: dict) -> dict:
     return population
 
 
-def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
+def tournament_selection_without_replacement(population: dict, n_ary: int = 2, minima: bool = True,
+                                             fitness_key_name: str = fit_func.__FITNESS_KEY__) -> str:
     """
     Get winner of a tournament (key of winner) based on the fitness value
+    :param fitness_key_name:
+    :param minima: look for lowest value if True(default), False looks for largest value
     :param n_ary: number of individuals to conduct tournament on, default = binary
     :param population: all the individuals we are selecting from
     :return: the key of the winner of tournament
@@ -93,14 +96,17 @@ def tournament_selection_without_replacement(population: dict, n_ary: int = 2):
     if n_ary < 2:
         raise ValueError('tournament selection must be binary or larger, currently {0}'.format(n_ary))
     population_keys = list(population.keys())
-    key_of_minimum = population_keys[random.randint(0, len(population_keys)) - 1]
+    # choose a random one to start
+    current_key = random.choice(population_keys)
     for _ in range(1, n_ary):
-        idx = random.randint(0, len(population) - 1)
-        # TODO: make if statement more general, not just fitness value
-        if population[population_keys[idx]][fit_func.__FITNESS_KEY__] < \
-                population[key_of_minimum][fit_func.__FITNESS_KEY__]:
-            key_of_minimum = population_keys[idx]
-    return key_of_minimum
+        contender_key = random.choice(population_keys)
+        val_current = population[current_key][fitness_key_name]
+        val_contender = population[contender_key][fitness_key_name]
+        replace = val_contender < val_current if minima else val_contender > val_current
+        if replace:
+            current_key = contender_key
+    # key that won tournament
+    return current_key
 
 
 def generate_mating_pool_from_archive(archive: dict, mating_pool_size: int) -> dict:
@@ -115,9 +121,16 @@ def generate_mating_pool_from_archive(archive: dict, mating_pool_size: int) -> d
     return mating_pool
 
 
-def recombine(sequence1: str, sequence2: str, number_of_sites: int) -> str:
-    # random positions with no duplicates
-    crossover_sites = {random.randint(0, len(sequence1)) for _ in range(number_of_sites)}
+def recombine_dna_sequence(sequence1: str, sequence2: str, number_of_sites: int) -> str:
+    # recombination we must ensure at codon lengths only
+    if number_of_sites < 1:
+        raise ValueError('number of sites needs to be greater than 0')
+    if len(sequence1) != len(sequence2):
+        raise ValueError('Cannot recombine sequences of different sizes')
+    # randomly select all the crossover sites
+    all_possible_crossover_sites = [num for num in range(0, len(sequence1), 3)]
+    # pare down the crossover sites (may result in less than number of desired sites but that is ok. RNGesus has spoken
+    crossover_sites = {random.choice(all_possible_crossover_sites) for _ in range(number_of_sites)}
     crossover_sites = list(crossover_sites)
     crossover_sites.sort()
     # assuming sequences are randomly chosen, it is ok to pick 1 to go first
@@ -176,7 +189,8 @@ def generate_population_from_archive(params: dict) -> dict:
         if idx1 != idx2:
             parent_a = mating_pool[mating_pool_keys[idx1]]
             parent_b = mating_pool[mating_pool_keys[idx2]]
-            child_seq = recombine(parent_a[__SEQUENCE_KEY__], parent_b[__SEQUENCE_KEY__], params['num crossover sites'])
+            child_seq = recombine_dna_sequence(parent_a[__SEQUENCE_KEY__], parent_b[__SEQUENCE_KEY__],
+                                               params['num crossover sites'])
         else:
             child_seq = mating_pool[mating_pool_keys[idx1]][__SEQUENCE_KEY__]
         child_seq = mutate_seq(child_seq, params)
