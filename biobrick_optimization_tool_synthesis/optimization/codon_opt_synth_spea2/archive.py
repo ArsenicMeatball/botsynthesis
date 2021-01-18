@@ -14,7 +14,8 @@ def build_archive(population: dict, archive_size: int, sort_key: str, non_domina
     logging.info('building archive')
     if len(population) <= archive_size:
         logging.warning(
-            'Archive larger ({0} items) than supplied population ({1} items)!'.format(archive_size, len(population))
+            'Archive >= ({0} items) than supplied population ({1} items)! returning population'.format(
+                archive_size, len(population))
         )
         return population
     archive = {}

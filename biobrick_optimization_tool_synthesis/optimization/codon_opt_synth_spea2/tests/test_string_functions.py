@@ -1,7 +1,7 @@
 import unittest
 
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import *
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.tests.test_parameters import \
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.all_algorithm_parameters import \
     algorithm_params
 
 
@@ -69,7 +69,7 @@ class TestStringFunctions(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_get_number_of_repeats_from_dict_pass(self):
-        pass
+        self.assertEqual(True, False)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ class TestArchive(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.correct_sort_key = '1'
-        cls.not_exist_sort_key = '3'
+        cls.not_exist_sort_key = 'tronbikesupreme'
         seq1 = {cls.correct_sort_key: 5}
         seq2 = {cls.correct_sort_key: 4}
         seq3 = {cls.correct_sort_key: 3}
@@ -32,12 +32,9 @@ class TestArchive(unittest.TestCase):
     def test_build_archive_not_existing(self):
         pops = [self.pop_5, self.pop_1]
         for pop in pops:
-            self.assertRaises(KeyError, arch.build_archive(pop, len(pop) + 1, self.not_exist_sort_key))
-            self.assertRaises(KeyError, arch.build_archive(pop, len(pop), self.not_exist_sort_key))
-            self.assertRaises(KeyError, arch.build_archive(pop, len(pop) - 1, self.not_exist_sort_key))
-            self.assertRaises(KeyError, arch.build_archive(pop, 1, self.not_exist_sort_key))
-            self.assertRaises(KeyError, arch.build_archive(pop, 0, self.not_exist_sort_key))
-            self.assertRaises(KeyError, arch.build_archive(pop, -1, self.not_exist_sort_key))
+            self.assertRaises(KeyError, arch.build_archive, pop, len(pop) - 1, self.not_exist_sort_key)
+            self.assertRaises(KeyError, arch.build_archive, pop, 0, self.not_exist_sort_key)
+            self.assertRaises(KeyError, arch.build_archive, pop, -1, self.not_exist_sort_key)
 
     def test_build_archive_pop5_arch_size_gt_pop(self):
         archive = arch.build_archive(self.pop_5, len(self.pop_5) + 1, self.correct_sort_key)
@@ -76,7 +73,7 @@ class TestArchive(unittest.TestCase):
             self.fail('Incorrect archive size')
 
     def test_build_archive_pop5_arch_size_neg_1(self):
-        self.assertRaises(ValueError, arch.build_archive(self.pop_5, -1, self.correct_sort_key))
+        self.assertRaises(IndexError, arch.build_archive, self.pop_5, -1, self.correct_sort_key)
 
     def test_build_archive_pop1_arch_size_gt_pop(self):
         archive = arch.build_archive(self.pop_1, len(self.pop_1) + 1, self.correct_sort_key)
@@ -98,7 +95,7 @@ class TestArchive(unittest.TestCase):
             self.fail('Incorrect archive size')
 
     def test_build_archive_pop1_arch_size_neg_1(self):
-        self.assertRaises(ValueError, arch.build_archive(self.pop_1, -1, self.correct_sort_key))
+        self.assertRaises(IndexError, arch.build_archive, self.pop_1, -1, self.correct_sort_key)
 
     def test_build_archive_empty_arch_size_1(self):
         archive = arch.build_archive(self.empty, 1, self.correct_sort_key)
@@ -111,7 +108,7 @@ class TestArchive(unittest.TestCase):
             self.fail('Expected empty archive')
 
     def test_build_archive_empty_arch_size_neg_1(self):
-        self.assertRaises(ValueError, arch.build_archive(self.empty, -1, self.correct_sort_key))
+        self.assertRaises(IndexError, arch.build_archive, self.empty, -1, self.correct_sort_key)
 
     # add dominated to archive black box
     # empty archive, archive size 1, archive smaller than population, archive == population, archive larger than population
@@ -121,13 +118,16 @@ class TestArchive(unittest.TestCase):
     # if nothing goes badly, the size of the archive will INCREASE to the archive size
     # else an error should pop up
     # def test_add_dominated_to_archive_arch5_pop1_arch_size_gt_pop
+    def test_add_dominated_to_archive_pass(self):
+        pass
 
     # truncate archive
     # empty archive, population of 1, population of many (5)
     # archive size of -1, 0, 1, between 1 and size of archive, size of archive, greater than size of archive
     # sort key correct, not existing
     # if nothing goes badly, an archive (subset of the population) with size equal to archive size will be returned
-
+    def test_truncate_archive(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
