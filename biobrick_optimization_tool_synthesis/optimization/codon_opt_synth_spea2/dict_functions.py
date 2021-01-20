@@ -1,7 +1,6 @@
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.list_functions import \
     differences_between_two_lists
 
-
 def get_differences_dict_list(dict1: dict, dict2: dict) -> dict:
     """
     grabs the differences between two dicts
@@ -66,3 +65,21 @@ def sort_dict_by_value(d: dict) -> list:
     :return: values in order
     """
     return sorted(d.values())
+
+
+def invert_dict(d: dict, is_naive=False) -> dict:
+    """
+    reverses a dict
+    :param is_naive: True for pretending like it is a 1-1 mapping (may lose entries), False to have sets for keys with
+        multiple mappings
+    :param d: the dict to invert
+    :return: inverted dict
+    """
+    if is_naive:
+        return {v: k for k, v in d.items()}
+    inv_dict = {}
+    for k, v in d.items():
+        if v not in inv_dict:
+            inv_dict[v] = set()
+        inv_dict[v].add(k)
+    return inv_dict
