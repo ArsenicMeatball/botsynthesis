@@ -5,36 +5,32 @@ import uuid
 
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
+from Bio.Data import CodonTable
 
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_func
-
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions as dictf
 __SEQUENCE_KEY__ = 'sequence'
 
 
-def mutate_codon(sequence: str, codon_usage: dict, idx=0, translation_dict: dict = None):
-    """
-
-    :param sequence:
-    :param idx:
-    :param codon_usage:
-    :param translation_dict:
+def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.generic_by_id[1]):
+    """ Takes a codon and attempts to mutate it
+    :param codon_table:
+    :param codon:
     :return:
     """
-    codon = str(sequence[idx:idx + 3])
     if len(codon) != 3:
-        logging.warning('Codon {0} is not of size 3'.format(codon))
+        raise ValueError('Codon {0} is not of size 3'.format(codon))  # not handled by biopython
+    # get our amino acid to figure out what codon possibilities there are
+    amino = codon_table.forward_table[codon]
+    full_back_table = dictf.invert_dict(codon_table.forward_table)
+    possible_codons = full_back_table[amino]
+    if len(possible_codons) == 1:
+        logging.info('wasted a call on mutate codon - codon is unique and cannot be changed')
         return codon
-    amino = Seq(codon, IUPAC.unambiguous_dna).translate() if translation_dict is None \
-        else Seq(codon, IUPAC.unambiguous_dna).translate(translation_dict)
-    if len(codon_usage[amino]) < 1:
-        raise Exception(
-            'Amino acid recovered ({0}) is not compatible with codon usage table {1} given. \n'
-            'Please provide a translation table compatible with the codon_usage table'.format(amino, codon_usage)
-        )
-    new_codon = random.choice(list(codon_usage[amino].keys()))
-    if new_codon == codon and len(codon_usage[amino]) > 1:
-        # try again once
-        new_codon = random.choice(list(codon_usage[amino].keys()))
+    # remove original codon
+    possible_codons.remove(codon)
+    # pick another
+    new_codon = random.choice(list(possible_codons))
     return new_codon
 
 
@@ -50,13 +46,14 @@ def mutate_seq(sequence: str, param: dict) -> str:
     new_sequence = ''
     logging.debug('Mutation % {0}, Codon Usage {1}, Unmutated Sequence {2}'.format(
         param['mutation %'], param['codon usage'], sequence))
+    codons = []
     for idx in range(0, len(sequence), 3):
         # either add the og codon or mutated boy
-        new_sequence += (
-            str(sequence[idx:idx + 3])
-            if random.randint(1, 100) > param['mutation %']
-            else str(mutate_codon(sequence, param['codon usage'], idx))
-        )
+        codon = str(sequence[idx:idx + 3])
+        if random.randint(1, 100) > param['mutation %']:
+            codon = mutate_codon(codon, param['codon usage'])
+        codons.append(codon)
+    new_sequence.join(codons)
     logging.debug('Mutated sequence {0}'.format(new_sequence))
     return new_sequence
 
