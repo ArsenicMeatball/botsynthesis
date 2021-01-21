@@ -36,7 +36,8 @@ def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.unambiguous_dn
     return new_codon
 
 
-def mutate_seq(sequence: str, mutation_chance: float, codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]) -> str:
+def mutate_seq(sequence: str, mutation_chance: float,
+               codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]) -> str:
     """
         mutate a DNA Seq based on the mutation probability, returns a different DNA Seq
     :param codon_table:
@@ -64,18 +65,23 @@ def mutate_seq(sequence: str, mutation_chance: float, codon_table: CodonTable = 
     return new_sequence
 
 
-def initialize_population(algorithm_parameters: dict) -> dict:
-    """
-        create population of mutants based on the codon optimized sequence
-    :param algorithm_parameters: dict containing the parameters for the SPEA2 algorithm
-    :return: dict representing the population
+def initialize_population(desired_population_size: int, parent_sequence: str, mutation_chance: float,
+                          codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]) -> dict:
+    """ Initialize a population based around the parent sequence
+    :param desired_population_size: the desired size of the population
+    :param parent_sequence: the parent sequence - better being codon optimized
+    :param mutation_chance: the chance to mutate each codon
+    :param codon_table: dict mapping codons to amino acids. see CodonTable docs
+    :return: dict containing the population
+        {seq_id : {seq_key : actual sequence}, ...more seq ids}
     """
     population = {}
     sequences = set()
     attempts = 0
-    while len(population) < algorithm_parameters['population size'] and \
-            attempts < algorithm_parameters['max init population attempts']:
-        seq = mutate_seq(algorithm_parameters['codon opt seq'], algorithm_parameters)
+    max_attempts = 25
+    while len(population) < desired_population_size and \
+            attempts < max_attempts:
+        seq = mutate_seq(parent_sequence, mutation_chance, codon_table)
         if seq not in sequences:
             sequences.add(seq)
             seq_id = uuid.uuid4()
