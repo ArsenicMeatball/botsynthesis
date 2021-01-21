@@ -1,28 +1,29 @@
+import logging
 import unittest
 
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
+from difflib import ndiff
 
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations as mut
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions as dictf
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions as strf
 
 
 # TODO finish tests
 class TestMutations(unittest.TestCase):
     def test_mutate_codon_pass(self):
-        s1 = 'actagctacggaattagcagaagcaatgctagc'
-        s2 = 'acaagttatgggatctcgcgatcgaacgcaagt'
         # regular case
         initial_codon = 'aac'.upper()
-        codon_table = CodonTable.generic_by_id[1]
+        codon_table = CodonTable.unambiguous_dna_by_id[1]
         new_codon = mut.mutate_codon(initial_codon, codon_table)
         self.assertNotEqual(initial_codon, new_codon, 'mutate codon failed to change the codon when given the '
                                                       'opportunity')
         possible_codons = dictf.invert_dict(codon_table.forward_table)[codon_table.forward_table[initial_codon]]
         self.assertIn(new_codon, possible_codons, 'codon did not become a possible codon - wtf happened')
         # works with another translation dict
-        codon_table = CodonTable.generic_by_id[2]
+        codon_table = CodonTable.unambiguous_dna_by_id[2]
         new_codon = mut.mutate_codon(initial_codon, codon_table)
         self.assertNotEqual(initial_codon, new_codon, 'mutate codon failed to change the codon when given the '
                                                       'opportunity - using different table')
@@ -30,8 +31,8 @@ class TestMutations(unittest.TestCase):
         self.assertIn(new_codon, possible_codons, 'codon did not become a possible codon - wtf happened - '
                                                   'using different table')
         # no other codons case
-        initial_codon = 'ttg'.upper()
-        codon_table = CodonTable.generic_by_id[1]
+        initial_codon = 'tgg'.upper()
+        codon_table = CodonTable.unambiguous_dna_by_id[1]
         new_codon = mut.mutate_codon(initial_codon, codon_table)
         self.assertEqual(initial_codon, new_codon, 'mutate codon failed to keep the codon when given only 1 option')
 
@@ -44,12 +45,49 @@ class TestMutations(unittest.TestCase):
         initial_codon = 'acg'
         self.assertRaises(AttributeError, mut.mutate_codon, initial_codon, codon_table)
 
+    def test_mutate_seq_pass(self):
+        seq1 = 'actagctacggaattagcagaagcaatgctagc'.upper()
+        # regular, make sure length doesnt change
+        mutation_chance = 0.5
+        codon_table = CodonTable.unambiguous_dna_by_id[1]
+        mutant = mut.mutate_seq(seq1, mutation_chance, codon_table)
+        self.assertEqual(len(mutant), len(seq1), 'lengths changed unexpectedly')
+        # make sure the number of differences makes sense at 100% mutation
+        mutation_chance = 1
+        mutant = mut.mutate_seq(seq1, mutation_chance, codon_table)
+        minimum_number_of_differences = 11
+        maximum_number_of_differences = 20
+        actual_number_of_differences = strf.find_num_differences(seq1, mutant)
+        self.assertGreaterEqual(actual_number_of_differences, minimum_number_of_differences, 'too few mutations when 100%')
+        self.assertLessEqual(actual_number_of_differences, maximum_number_of_differences, 'too many mutations when 100%')
+        # make sure the number of differences makes sense at 0% mutation
+        mutation_chance = 0
+        mutant = mut.mutate_seq(seq1, mutation_chance, codon_table)
+        actual_number_of_differences = strf.find_num_differences(seq1, mutant)
+        self.assertEqual(actual_number_of_differences, 0, '0% mutations should result in the same string')
 
-    def test_mutate_seq(self):
-        self.assertEqual(True, False)
+    def test_mutate_seq_fail(self):
+        # sequence too small
+        seq = ''
+        mutation_chance = -1
+        self.assertRaises(ValueError, mut.mutate_seq, seq, mutation_chance)
+        # sequence not multiple of 3
+        seq = 'reeeeeeeeeeeeeeeee'
+        self.assertRaises(ValueError, mut.mutate_seq, seq, mutation_chance)
+        # mutation chance too low
+        seq = 'ACTGTA'
+        self.assertRaises(ValueError, mut.mutate_seq, seq, mutation_chance)
+        # mutation chance too high
+        mutation_chance = 2
+        self.assertRaises(ValueError, mut.mutate_seq, seq, mutation_chance)
+        # sequence not DNA
+        seq = 'reeeeeeee'
+        mutation_chance = 0.5
+        mut.mutate_seq(seq,mutation_chance)
+        self.assertRaises(KeyError, mut.mutate_seq, seq, mutation_chance)
 
     def test_initialize_population(self):
-        self.assertEqual(True, False)
+        pass
 
     def test_tournament_selection_without_replacement(self):
         key = 'key'
@@ -67,7 +105,7 @@ class TestMutations(unittest.TestCase):
         self.assertEqual(expected, winner, 'winner should be 3, (2/3)^200 chance of not occurring')
 
     def test_generate_mating_pool_from_archive(self):
-        self.assertEqual(True, False)
+        pass
 
     def test_recombine(self):
         # test that from 2 strings, the new one is created
@@ -90,8 +128,8 @@ class TestMutations(unittest.TestCase):
         self.assertRaises(ValueError, mut.recombine_dna_sequence, s1, s2[:-2], 5)
 
     def test_generate_population_from_archive(self):
-        self.assertEqual(True, False)
-
+        pass
 
 if __name__ == '__main__':
+    logging.basicConfig(level="DEBUG")
     unittest.main()

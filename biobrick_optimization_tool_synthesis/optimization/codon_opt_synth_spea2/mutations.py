@@ -9,10 +9,11 @@ from Bio.Data import CodonTable
 
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_func
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions as dictf
+
 __SEQUENCE_KEY__ = 'sequence'
 
 
-def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.generic_by_id[1]):
+def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]):
     """ Takes a codon and attempts to mutate it
     :param codon_table:
     :param codon:
@@ -29,31 +30,36 @@ def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.generic_by_id[
         return codon
     # remove original codon
     possible_codons.remove(codon)
+    logging.debug("possible choices {}, initial codon {}, amino {}".format(possible_codons, codon, amino))
     # pick another
     new_codon = random.choice(list(possible_codons))
     return new_codon
 
 
-def mutate_seq(sequence: str, param: dict) -> str:
+def mutate_seq(sequence: str, mutation_chance: float, codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]) -> str:
     """
         mutate a DNA Seq based on the mutation probability, returns a different DNA Seq
+    :param codon_table:
+    :param mutation_chance:
     :param sequence:
-    :param param:
     :return:
     """
-    if sequence == '':
-        raise ValueError('Sequence is empty')
-    new_sequence = ''
+    if len(sequence) < 3 or len(sequence) % 3 != 0:
+        raise ValueError('Sequence {} cannot be sliced into codons'.format(sequence))
+    if mutation_chance < 0 or mutation_chance > 1:
+        raise ValueError('Mutation chance {} needs to be a float between 0 and 1'.format(mutation_chance))
     logging.debug('Mutation % {0}, Codon Usage {1}, Unmutated Sequence {2}'.format(
-        param['mutation %'], param['codon usage'], sequence))
+        mutation_chance, codon_table, sequence))
     codons = []
     for idx in range(0, len(sequence), 3):
         # either add the og codon or mutated boy
         codon = str(sequence[idx:idx + 3])
-        if random.randint(1, 100) > param['mutation %']:
-            codon = mutate_codon(codon, param['codon usage'])
+        # random random generates random between 0 and 1, if it is smaller than mutation chance, then mutate
+        if random.random() < mutation_chance:
+            codon = mutate_codon(codon, codon_table)
         codons.append(codon)
-    new_sequence.join(codons)
+    # add everything at once because memory
+    new_sequence = ''.join(codons)
     logging.debug('Mutated sequence {0}'.format(new_sequence))
     return new_sequence
 
