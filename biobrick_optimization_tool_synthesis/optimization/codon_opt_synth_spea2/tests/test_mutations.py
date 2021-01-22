@@ -92,11 +92,18 @@ class TestMutations(unittest.TestCase):
         desired_size = 10
         population = mut.initialize_population(desired_population_size=desired_size, parent_sequence=seq, mutation_chance=0.7)
         self.assertEqual(len(population), desired_size, 'Failed to create a population diverse enough')
-        pass
+        # can it create a good population with tougher parameters?
+        population = mut.initialize_population(desired_population_size=desired_size, parent_sequence=seq, mutation_chance=0.2)
+        self.assertEqual(
+            len(population), desired_size,
+            'Failed to create a population diverse enough, using a low mutation chance'
+        )
 
     def test_initialize_population_fail(self):
-
-        pass
+        # bad population
+        seq = 'actagctacggaattagcagaagcaatgctagc'.upper()
+        desired_size = 0
+        self.assertRaises(ValueError, mut.initialize_population, desired_size, seq, 0.7)
 
     def test_tournament_selection_without_replacement(self):
         key = 'key'

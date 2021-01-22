@@ -11,7 +11,7 @@ import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.f
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions as dictf
 
 __SEQUENCE_KEY__ = 'sequence'
-
+__MAX_POPULATION_SIZE__ = 500
 
 def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]):
     """ Takes a codon and attempts to mutate it
@@ -75,6 +75,8 @@ def initialize_population(desired_population_size: int, parent_sequence: str, mu
     :return: dict containing the population
         {seq_id : {seq_key : actual sequence}, ...more seq ids}
     """
+    if desired_population_size < 1 or __MAX_POPULATION_SIZE__ < desired_population_size:
+        raise ValueError('Desired population size {} is not within 1 and {}'.format(desired_population_size, __MAX_POPULATION_SIZE__))
     population = {}
     sequences = set()
     attempts = 0
