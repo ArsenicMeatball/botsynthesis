@@ -13,6 +13,7 @@ import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.d
 __SEQUENCE_KEY__ = 'sequence'
 __MAX_POPULATION_SIZE__ = 500
 
+
 def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]):
     """ Takes a codon and attempts to mutate it
     :param codon_table:
@@ -36,6 +37,7 @@ def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.unambiguous_dn
     return new_codon
 
 
+# TODO update higher calls for signature
 def mutate_seq(sequence: str, mutation_chance: float,
                codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]) -> str:
     """
@@ -65,6 +67,7 @@ def mutate_seq(sequence: str, mutation_chance: float,
     return new_sequence
 
 
+# TODO update higher calls for signature
 def initialize_population(desired_population_size: int, parent_sequence: str, mutation_chance: float,
                           codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]) -> dict:
     """ Initialize a population based around the parent sequence
@@ -76,7 +79,9 @@ def initialize_population(desired_population_size: int, parent_sequence: str, mu
         {seq_id : {seq_key : actual sequence}, ...more seq ids}
     """
     if desired_population_size < 1 or __MAX_POPULATION_SIZE__ < desired_population_size:
-        raise ValueError('Desired population size {} is not within 1 and {}'.format(desired_population_size, __MAX_POPULATION_SIZE__))
+        raise ValueError('Desired population size {} is not within 1 and {}'.format(
+            desired_population_size, __MAX_POPULATION_SIZE__)
+        )
     population = {}
     sequences = set()
     attempts = 0
@@ -120,14 +125,27 @@ def tournament_selection_without_replacement(population: dict, n_ary: int = 2, m
     return current_key
 
 
-def generate_mating_pool_from_archive(archive: dict, mating_pool_size: int) -> dict:
-    if len(archive) == 0:
-        raise ValueError('archive cannot be empty')
-    if mating_pool_size >= len(archive):
-        return archive
+def generate_mating_pool_from_archive(archive: dict, desired_mating_pool_size: int,
+                                      fitness_key_name: str = fit_func.__FITNESS_KEY__) -> dict:
+    """ Selects a portion of the archive to generate a mating pool
+    :param fitness_key_name:
+    :param archive:
+    :param desired_mating_pool_size:
+    :return:
+    """
+    # 1 < mating pool < archive
+    if 1 > desired_mating_pool_size or len(archive) < desired_mating_pool_size:
+        raise ValueError(
+            'Desired mating pool size {} must be greater than 1, and must be smaller than archive size {}'.format(
+                desired_mating_pool_size, len(archive)
+            )
+        )
     mating_pool = {}
-    while len(mating_pool) < mating_pool_size:
-        key_to_add = tournament_selection_without_replacement(archive, 2)
+    while len(mating_pool) < desired_mating_pool_size:
+        # use a minima binary tournament based on the fitness of the individual to add to mating pool
+        key_to_add = tournament_selection_without_replacement(
+            archive, n_ary=2, minima=True, fitness_key_name=fitness_key_name
+        )
         mating_pool[key_to_add] = archive[key_to_add]
     return mating_pool
 

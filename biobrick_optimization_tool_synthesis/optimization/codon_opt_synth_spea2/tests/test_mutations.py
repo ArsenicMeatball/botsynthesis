@@ -1,14 +1,13 @@
-import logging
 import unittest
 
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
-from difflib import ndiff
 
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations as mut
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions as dictf
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions as strf
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fitf
 
 
 # TODO finish tests
@@ -58,8 +57,10 @@ class TestMutations(unittest.TestCase):
         minimum_number_of_differences = 11
         maximum_number_of_differences = 20
         actual_number_of_differences = strf.find_num_differences(seq1, mutant)
-        self.assertGreaterEqual(actual_number_of_differences, minimum_number_of_differences, 'too few mutations when 100%')
-        self.assertLessEqual(actual_number_of_differences, maximum_number_of_differences, 'too many mutations when 100%')
+        self.assertGreaterEqual(actual_number_of_differences, minimum_number_of_differences,
+                                'too few mutations when 100%')
+        self.assertLessEqual(actual_number_of_differences, maximum_number_of_differences,
+                             'too many mutations when 100%')
         # make sure the number of differences makes sense at 0% mutation
         mutation_chance = 0
         mutant = mut.mutate_seq(seq1, mutation_chance, codon_table)
@@ -83,17 +84,19 @@ class TestMutations(unittest.TestCase):
         # sequence not DNA
         seq = 'reeeeeeee'
         mutation_chance = 0.5
-        mut.mutate_seq(seq,mutation_chance)
+        mut.mutate_seq(seq, mutation_chance)
         self.assertRaises(KeyError, mut.mutate_seq, seq, mutation_chance)
 
     def test_initialize_population_pass(self):
         # can it create a good population with default parameters
         seq = 'actagctacggaattagcagaagcaatgctagc'.upper()
         desired_size = 10
-        population = mut.initialize_population(desired_population_size=desired_size, parent_sequence=seq, mutation_chance=0.7)
+        population = mut.initialize_population(desired_population_size=desired_size, parent_sequence=seq,
+                                               mutation_chance=0.7)
         self.assertEqual(len(population), desired_size, 'Failed to create a population diverse enough')
         # can it create a good population with tougher parameters?
-        population = mut.initialize_population(desired_population_size=desired_size, parent_sequence=seq, mutation_chance=0.2)
+        population = mut.initialize_population(desired_population_size=desired_size, parent_sequence=seq,
+                                               mutation_chance=0.2)
         self.assertEqual(
             len(population), desired_size,
             'Failed to create a population diverse enough, using a low mutation chance'
@@ -105,12 +108,11 @@ class TestMutations(unittest.TestCase):
         desired_size = 0
         self.assertRaises(ValueError, mut.initialize_population, desired_size, seq, 0.7)
 
-    def test_tournament_selection_without_replacement(self):
+    def test_tournament_selection_without_replacement_pass(self):
         key = 'key'
         population = {
             1: {key: 9099990.393}, 2: {key: 9099990.392}, 3: {key: 9099990.394}
         }
-        self.assertRaises(ValueError, mut.tournament_selection_without_replacement, population, 1)
         winner = mut.tournament_selection_without_replacement(population, fitness_key_name=key)
         self.assertIn(winner, population.keys(), 'winner should be in the population')
         winner = mut.tournament_selection_without_replacement(population, n_ary=100, fitness_key_name=key)
@@ -120,8 +122,36 @@ class TestMutations(unittest.TestCase):
         expected = 3
         self.assertEqual(expected, winner, 'winner should be 3, (2/3)^200 chance of not occurring')
 
-    def test_generate_mating_pool_from_archive(self):
-        pass
+    def test_tournament_selection_without_replacement_fail(self):
+        key = 'key'
+        population = {
+            1: {key: 9099990.393}, 2: {key: 9099990.392}, 3: {key: 9099990.394}
+        }
+        self.assertRaises(ValueError, mut.tournament_selection_without_replacement, population, 1)
+
+    def test_generate_mating_pool_from_archive_pass(self):
+        # can generate a mating pool from an archive
+        key = 'key'
+        archive = {1: {key: 1}, 2: {key: 2}, 3: {key: 3}, 4: {key: 4}, 5: {key: 5}}
+        desired_size = 3
+        mating_pool = mut.generate_mating_pool_from_archive(archive, desired_size, key)
+        self.assertEqual(len(mating_pool), desired_size, 'mating pool did not reach desired size')
+        self.assertTrue(mating_pool.items() <= archive.items(), 'mating pool is not a subset of the archive')
+        # default key works
+        key = fitf.__FITNESS_KEY__
+        archive = {1: {key: 1}, 2: {key: 2}, 3: {key: 3}, 4: {key: 4}, 5: {key: 5}}
+        mating_pool = mut.generate_mating_pool_from_archive(archive, desired_size)
+        self.assertEqual(len(mating_pool), desired_size, 'mating pool did not reach desired size with default key')
+        self.assertTrue(mating_pool.items() <= archive.items(), 'mating pool is not a subset of the archive with default key')
+
+    def test_generate_mating_pool_from_archive_fail(self):
+        # smol archive
+        self.assertRaises(ValueError, mut.generate_mating_pool_from_archive, {}, 5)
+        # smol mating pool
+        archive = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        self.assertRaises(ValueError, mut.generate_mating_pool_from_archive, archive, 0)
+        # big mating pool
+        self.assertRaises(ValueError, mut.generate_mating_pool_from_archive, archive, 100)
 
     def test_recombine(self):
         # test that from 2 strings, the new one is created
@@ -146,6 +176,6 @@ class TestMutations(unittest.TestCase):
     def test_generate_population_from_archive(self):
         pass
 
+
 if __name__ == '__main__':
-    logging.basicConfig(level="DEBUG")
     unittest.main()
