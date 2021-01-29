@@ -37,7 +37,6 @@ def mutate_codon(codon: str, codon_table: CodonTable = CodonTable.unambiguous_dn
     return new_codon
 
 
-# TODO update higher calls for signature
 def mutate_seq(sequence: str, mutation_chance: float,
                codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]) -> str:
     """
@@ -150,14 +149,25 @@ def generate_mating_pool_from_archive(archive: dict, desired_mating_pool_size: i
     return mating_pool
 
 
-def recombine_dna_sequence(sequence1: str, sequence2: str, number_of_sites: int) -> str:
-    # recombination we must ensure at codon lengths only
+def recombine_dna_sequence(sequence1: str, sequence2: str, number_of_sites: int, spread_between_sites:int=3) -> str:
+    """ Recombines 2 sequences to try and create a new sequence incorporating portions of each
+    :param sequence1:
+    :param sequence2:
+    :param number_of_sites:
+    :param spread_between_sites:
+    :return:
+    """
+    # recombination we must ensure at codon lengths only (spread between sites = 3)
     if number_of_sites < 1:
         raise ValueError('number of sites needs to be greater than 0')
     if len(sequence1) != len(sequence2):
         raise ValueError('Cannot recombine sequences of different sizes')
+    if sequence1 == sequence2:
+        logging.warning('Cannot recombine the same sequence')
+        return sequence1
     # randomly select all the crossover sites
-    all_possible_crossover_sites = [num for num in range(0, len(sequence1), 3)]
+    # get all possible sites and start chopping them off
+    all_possible_crossover_sites = [num for num in range(0, len(sequence1), spread_between_sites)]
     # pare down the crossover sites (may result in less than number of desired sites but that is ok. RNGesus has spoken
     crossover_sites = {random.choice(all_possible_crossover_sites) for _ in range(number_of_sites)}
     crossover_sites = list(crossover_sites)
@@ -188,45 +198,71 @@ def recombine_dna_sequence(sequence1: str, sequence2: str, number_of_sites: int)
     return new_seq
 
 
-def generate_population_from_archive(params: dict) -> dict:
-    """
+def get_rec_sites_for_len(sequence_length:int, recombination_chance:float)->int:
+    if recombination_chance > 1 or recombination_chance < 0:
+        raise ValueError('Recombination chance {} needs to be between 0 and 1'.format(recombination_chance))
+    num_recomb_sites = round(sequence_length/3 * recombination_chance)
+    return num_recomb_sites
 
-    :param params: dict that contains:
-        archive: dict which contains the sequences
-        population size: int which tells the size of final population
-        num crossover sites: int
-        mutation %: int for percent mutation chance
-        codon usage: dict to know the mapping of different codons
-    :return:
-    """
+
+def generate_population_from_archive(
+        _archive: dict,
+        desired_mating_pool_size: int,
+        num_recombination_sites: int,
+        mutation_chance: float,
+        desired_population_size: int,
+        fitness_key_name: str = fit_func.__FITNESS_KEY__,
+        codon_table: CodonTable = CodonTable.unambiguous_dna_by_id[1]
+    ) -> dict:
+    if desired_population_size < 1:
+        raise ValueError('desired population size ({}) must be greater than 0'.format(desired_population_size))
     # don't touch archive
-    archive_copy = copy.deepcopy(params['archive'])
-    # create mating pool from subset of archive
-    mating_pool = generate_mating_pool_from_archive(archive_copy, params['mating pool size'])
-    # until population is full
-    #   choose 2 randomly selected individuals in mating pool
-    #       apply recombination to create a new child
-    #       run child under mutations
-    new_population = {}
-    mating_pool_keys = list(mating_pool.keys())
-    sequences_set = set()
+    archive_copy = copy.deepcopy(_archive)
+    # save all ids and sequences for quick look up
+    archive_sequences_and_ids = {}
+    for ide, attr in _archive.items():
+        archive_sequences_and_ids[attr[__SEQUENCE_KEY__]] = ide
+
+    # create mating pool as subset of copied archive
+    mating_pool = generate_mating_pool_from_archive(archive_copy, desired_mating_pool_size, fitness_key_name)
+    # try and create a population from the mating pool
+    population = {}
+    max_attempts = desired_population_size / 2
+    # save newly generated sequences for quick lookup, duplication will result in attempts
+    sequences = set()
     attempts = 0
-    max_attempts = 2 * params['population size']
-    while len(new_population) < params['population size'] and attempts < max_attempts:
-        idx1 = random.randint(0, len(mating_pool_keys) - 1)
-        idx2 = random.randint(0, len(mating_pool_keys) - 1)
-        if idx1 != idx2:
-            parent_a = mating_pool[mating_pool_keys[idx1]]
-            parent_b = mating_pool[mating_pool_keys[idx2]]
-            child_seq = recombine_dna_sequence(parent_a[__SEQUENCE_KEY__], parent_b[__SEQUENCE_KEY__],
-                                               params['num crossover sites'])
-        else:
-            child_seq = mating_pool[mating_pool_keys[idx1]][__SEQUENCE_KEY__]
-        child_seq = mutate_seq(child_seq, params)
-        if child_seq not in sequences_set:
-            sequences_set.add(child_seq)
-            child = {__SEQUENCE_KEY__: child_seq}
-            new_population[uuid.uuid4()] = child
-        else:
+    while len(population) < desired_population_size:
+        if attempts > max_attempts:
+            logging.warning('Failed to create a complete population of size {}, only has {}'.format(desired_population_size, len(population)))
+            break
+        # get 2 sequences, attempt to recombine them into one, mutate it, then add it in
+        tourney_winner_key_1 = tournament_selection_without_replacement(
+            population=mating_pool,
+            n_ary=2,
+            minima=True,
+            fitness_key_name=fitness_key_name
+        )
+        tourney_winner_key_2 = tournament_selection_without_replacement(
+            population=mating_pool,
+            n_ary=2,
+            minima=True,
+            fitness_key_name=fitness_key_name
+        )
+        recombined_child = recombine_dna_sequence(
+            sequence1=mating_pool[tourney_winner_key_1][__SEQUENCE_KEY__],
+            sequence2=mating_pool[tourney_winner_key_2][__SEQUENCE_KEY__],
+            number_of_sites=num_recombination_sites
+        )
+        mutant_child = mutate_seq(sequence=recombined_child, mutation_chance=mutation_chance, codon_table=codon_table)
+        # check if we created a new one
+        if mutant_child in archive_sequences_and_ids:
+            # if it already exists then just add the og which has a lot of information
+            population[archive_sequences_and_ids[mutant_child]] = archive_copy[archive_sequences_and_ids[mutant_child]]
             attempts += 1
-    return new_population
+        elif mutant_child in sequences:
+            # failed to create a new sequence
+            attempts += 1
+        else:
+            population[uuid.uuid4()] = {__SEQUENCE_KEY__: mutant_child}
+            sequences.add(mutant_child)
+    return population

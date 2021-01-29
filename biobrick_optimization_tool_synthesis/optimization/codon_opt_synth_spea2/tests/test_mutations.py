@@ -1,4 +1,6 @@
+import logging
 import unittest
+from typing import Dict, Union
 
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
@@ -142,7 +144,8 @@ class TestMutations(unittest.TestCase):
         archive = {1: {key: 1}, 2: {key: 2}, 3: {key: 3}, 4: {key: 4}, 5: {key: 5}}
         mating_pool = mut.generate_mating_pool_from_archive(archive, desired_size)
         self.assertEqual(len(mating_pool), desired_size, 'mating pool did not reach desired size with default key')
-        self.assertTrue(mating_pool.items() <= archive.items(), 'mating pool is not a subset of the archive with default key')
+        self.assertTrue(mating_pool.items() <= archive.items(),
+                        'mating pool is not a subset of the archive with default key')
 
     def test_generate_mating_pool_from_archive_fail(self):
         # smol archive
@@ -153,7 +156,7 @@ class TestMutations(unittest.TestCase):
         # big mating pool
         self.assertRaises(ValueError, mut.generate_mating_pool_from_archive, archive, 100)
 
-    def test_recombine(self):
+    def test_recombine_pass(self):
         # test that from 2 strings, the new one is created
         # new one is same aa
         s1 = 'actagctacggaattagcagaagcaatgctagc'
@@ -170,10 +173,73 @@ class TestMutations(unittest.TestCase):
             if num > 10:
                 self.assertTrue(r != s1, 'at large numbers of sites, the string should theoretically nearly never be '
                                          'the same as the parent chance=1/11^10')
+        # sending in the same sequence twice should result in the sequence being returned
+        new_seq = mut.recombine_dna_sequence(s1, s1, 10)
+        self.assertEqual(s1, new_seq, 'Failed to return parent sequence')
+
+    def test_recombine_fail(self):
+        s1 = 'actagctacggaattagcagaagcaatgctagc'
+        s2 = 'acaagttatgggatctcgcgatcgaacgcaagt'
+        # detect invalid number of sites
         self.assertRaises(ValueError, mut.recombine_dna_sequence, s1, s2, 0)
+        # detect unequal sequences
         self.assertRaises(ValueError, mut.recombine_dna_sequence, s1, s2[:-2], 5)
 
-    def test_generate_population_from_archive(self):
+    def test_generate_population_from_archive_pass(self):
+        # can it run regularly with default vars
+        s1 = 'actagctacggaattagcCGCagcaatgctagc'.upper()
+        s2 = 'ACAAGCTACGGTATTTCTCGTAGTAATGCTTCA'
+        s3 = 'ACTAGCTACGGCATCAGCCGCAGCAATGCTAGC'
+        s4 = 'ACTAGTTACGGGATTTCTCGGAGCAACGCAAGC'
+        s5 = 'ACGTCATACGGAATTAGCCGAAGTAATGCTAGC'
+        s6 = 'ACCAGCTATGGAATTAGTCGAAGCAACGCGAGC'
+        expected_aa = Seq(s1, IUPAC.unambiguous_dna).translate()
+        desired_population_size = 15
+        recomb_chance = mutation_chance = 0.2
+        num_recombination_sites = mut.get_rec_sites_for_len(len(s1), recomb_chance)
+        fit_key = fitf.__FITNESS_KEY__
+        seq_key = mut.__SEQUENCE_KEY__
+        archive = {1: {seq_key: s1, fit_key: 0.2},
+                   2: {seq_key: s2, fit_key: 1.9},
+                   3: {seq_key: s3, fit_key: 0.1},
+                   4: {seq_key: s4, fit_key: 0.7},
+                   5: {seq_key: s5, fit_key: 1.2},
+                   6: {seq_key: s6, fit_key: 0.9}}
+
+        desired_mating_pool_size = 4
+        population = mut.generate_population_from_archive(
+            archive, desired_mating_pool_size, num_recombination_sites,
+            mutation_chance, desired_population_size)
+        self.assertEqual(len(population), desired_population_size,
+                         'Failed to create a population of correct size')
+        for ind in population.values():
+            if ind[seq_key] in [s1, s2, s3, s4, s5, s6]:
+                logging.warning('new population member the same as an old member - undesirable behaviour')
+            self.assertEqual(expected_aa, Seq(ind[seq_key], IUPAC.unambiguous_dna).translate(),
+                             'Did not maintain Amino Acid integrity')
+        # can it run regularly with custom vars
+        codon_table = CodonTable.unambiguous_dna_by_id[2]
+        expected_aa = Seq(s1, IUPAC.unambiguous_dna).translate(codon_table)
+        fit_key = 'reeeee'
+        new_archive = {1: {seq_key: s1, fit_key: 0.2},
+                   2: {seq_key: s2, fit_key: 1.9},
+                   3: {seq_key: s3, fit_key: 0.1},
+                   4: {seq_key: s4, fit_key: 0.7},
+                   5: {seq_key: s5, fit_key: 1.2},
+                   6: {seq_key: s6, fit_key: 0.9}}
+        population = mut.generate_population_from_archive(
+            new_archive, desired_mating_pool_size, num_recombination_sites,
+            mutation_chance, desired_population_size, fit_key, codon_table)
+        self.assertEqual(len(population), desired_population_size,
+                         'Failed to create a population of correct size - custom')
+        for ind in population.values():
+            self.assertEqual(expected_aa, Seq(ind[seq_key], IUPAC.unambiguous_dna).translate(codon_table),
+                             'Did not maintain Amino Acid integrity - custom')
+
+    def test_get_rec_sites_for_len_pass(self):
+        pass
+
+    def test_get_rec_sites_for_len_fail(self):
         pass
 
 
