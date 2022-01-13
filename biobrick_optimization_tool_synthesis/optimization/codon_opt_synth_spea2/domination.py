@@ -1,10 +1,10 @@
 import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_funcs
 
-__NEITHER_EQUAL_CASE__ = 'neither'
-__DOMINATES_CASE__ = 'dominates'
-__DOMINATED_CASE__ = 'dominated'
-__STRENGTH_KEY__ = 'strength'
-__RAW_FITNESS_KEY__ = 'raw fitness'
+__NEITHER_EQUAL_CASE__ = "neither"
+__DOMINATES_CASE__ = "dominates"
+__DOMINATED_CASE__ = "dominated"
+__STRENGTH_KEY__ = "strength"
+__RAW_FITNESS_KEY__ = "raw fitness"
 
 
 def calculate_raw_fitness(population):
@@ -38,7 +38,10 @@ def find_dominated_solutions(population: dict) -> dict:
             if (seq_id1, seq_id2) not in visited:
                 left = population[seq_id1]
                 right = population[seq_id2]
-                left_x_right[seq_id1][seq_id2], left_x_right[seq_id2][seq_id1] = compare_two_solutions_for_dominance(
+                (
+                    left_x_right[seq_id1][seq_id2],
+                    left_x_right[seq_id2][seq_id1],
+                ) = compare_two_solutions_for_dominance(
                     left, right, fit_funcs.__SCORE_NAMES__
                 )
                 visited.add((seq_id1, seq_id2))
@@ -47,11 +50,11 @@ def find_dominated_solutions(population: dict) -> dict:
 
 
 def compare_two_solutions_for_dominance(
-        point_a: dict,
-        point_b: dict,
-        coordinates: list,
+    point_a: dict,
+    point_b: dict,
+    coordinates: list,
 ) -> tuple:
-    """ Determines if one of the points is dominated:
+    """Determines if one of the points is dominated:
     Domination (for minima):
         x dominates y, if for all coordinates, x's coordinate is smaller or equal to y's coordinate
     eg:
@@ -89,7 +92,7 @@ def compare_two_solutions_for_dominance(
     # a dominates
     elif tally_b == 0:
         return __DOMINATES_CASE__, __DOMINATED_CASE__
-    raise RuntimeError('should not be able to get here')
+    raise RuntimeError("should not be able to get here")
 
 
 def calculate_strength(left_x_right: dict, population: dict) -> dict:

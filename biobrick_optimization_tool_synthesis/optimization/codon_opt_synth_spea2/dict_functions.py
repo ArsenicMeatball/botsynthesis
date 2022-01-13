@@ -1,5 +1,7 @@
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.list_functions import \
-    differences_between_two_lists
+from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.list_functions import (
+    differences_between_two_lists,
+)
+
 
 def get_differences_dict_list(dict1: dict, dict2: dict) -> dict:
     """
@@ -13,7 +15,9 @@ def get_differences_dict_list(dict1: dict, dict2: dict) -> dict:
         if key not in dict2:
             result_dict[key] = dict1[key]
         else:
-            only_differences = differences_between_two_lists(dict1[key], dict2[key])
+            only_differences = differences_between_two_lists(
+                dict1[key], dict2[key]
+            )
             if len(only_differences) > 0:
                 result_dict[key] = only_differences
     for key in dict2.keys():

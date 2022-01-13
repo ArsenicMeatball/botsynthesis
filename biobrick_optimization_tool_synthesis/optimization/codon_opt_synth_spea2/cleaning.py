@@ -7,11 +7,11 @@ aa_set = set(IUPACData.protein_letters)
 dna_set = set(IUPACData.unambiguous_dna_letters)
 rna_set = set(IUPACData.unambiguous_rna_letters)
 
-INDETERMINATE = 'Indeterminate'
-INVALID = 'Invalid'
-RNA = 'rna'
-DNA = 'dna'
-AA = 'Amino Acid'
+INDETERMINATE = "Indeterminate"
+INVALID = "Invalid"
+RNA = "rna"
+DNA = "dna"
+AA = "Amino Acid"
 
 
 def determine_sequence_type(sequence: str):
@@ -40,13 +40,17 @@ def clean_sequence(sequence: str):
     return ("".join(sequence.split())).upper()
 
 
-def turn_string_sequence_into_amino(sequence: str, sequence_type: str = ''):
+def turn_string_sequence_into_amino(sequence: str, sequence_type: str = ""):
     sequence = clean_sequence(sequence)
-    if sequence_type == '':
+    if sequence_type == "":
         sequence_type = determine_sequence_type(sequence)
 
     # handle invalid sequence type stuff
-    if sequence_type[0] == INDETERMINATE or sequence_type == INDETERMINATE or sequence_type == INVALID:
+    if (
+        sequence_type[0] == INDETERMINATE
+        or sequence_type == INDETERMINATE
+        or sequence_type == INVALID
+    ):
         raise TypeError("Can't figure out the sequence type")
 
     # transform to a protein

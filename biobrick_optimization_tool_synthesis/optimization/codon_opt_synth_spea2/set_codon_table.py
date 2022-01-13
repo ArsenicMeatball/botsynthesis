@@ -18,8 +18,8 @@ def fetch_codon_table(organism_id=316407) -> dict:
     return pct.get_codons_table(organism_id)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(fetch_codon_table(316407))
     print(fetch_codon_table("316407"))
-    print(fetch_codon_table('e_coli'))
-    print('done')
+    print(fetch_codon_table("e_coli"))
+    print("done")

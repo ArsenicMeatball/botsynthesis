@@ -1,5 +1,5 @@
 def differences_between_two_lists(list1: list, list2: list) -> list:
-    """ gets differences between two lists
+    """gets differences between two lists
     :param list1: (list) of elements
     :param list2: (list) of elements
     :return (set) differences
@@ -8,7 +8,7 @@ def differences_between_two_lists(list1: list, list2: list) -> list:
 
 
 def number_of_differences_between_two_lists(list1: list, list2: list) -> int:
-    """ gets number of differences between two lists
+    """gets number of differences between two lists
     :param list1: (list) of elements
     :param list2: (list) of elements
     :return (int) num differences
