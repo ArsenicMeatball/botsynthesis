@@ -5,8 +5,8 @@ import uuid
 
 from Bio.Data import CodonTable
 
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_func
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions as dictf
+import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.\
+    dict_functions as dictf
 
 __SEQUENCE_KEY__ = "sequence"
 __MAX_POPULATION_SIZE__ = 500
@@ -63,7 +63,8 @@ def mutate_seq(
     codon_table: CodonTable,
 ) -> str:
     """
-        mutate a DNA Seq based on the mutation probability, returns a different DNA Seq
+        mutate a DNA Seq based on the mutation probability,
+        returns a different DNA Seq
     :param codon_table:
     :param mutation_chance:
     :param sequence:
@@ -161,10 +162,7 @@ def tournament_selection_without_replacement(
     population_keys = list(population.keys())
     # choose a random one to start
     current_key = random.choice(population_keys)
-    try:
-        val_current = population[current_key][fitness_key_name]
-    except KeyError:
-        pass
+    val_current = population[current_key][fitness_key_name]
     for _ in range(1, n_ary):
         contender_key = random.choice(population_keys)
         val_contender = population[contender_key][fitness_key_name]
@@ -215,7 +213,8 @@ def recombine_dna_sequence(
     number_of_sites: int,
     spread_between_sites: int,
 ) -> str:
-    """Recombines 2 sequences to try and create a new sequence incorporating portions of each
+    """Recombines 2 sequences to try and create a new sequence incorporating
+     portions of each
     :param sequence1:
     :param sequence2:
     :param number_of_sites:
@@ -311,15 +310,16 @@ def generate_population_from_archive(
     # try and create a population from the mating pool
     population = {}
     max_attempts = desired_population_size / 2
-    # save newly generated sequences for quick lookup, duplication will result in attempts
+    # save newly generated sequences for quick lookup,
+    # duplication will result in attempts
     sequences = set()
     attempts = 0
     while len(population) < desired_population_size:
         if attempts > max_attempts:
             logging.warning(
-                "Failed to create a complete population of size {}, only has {}".format(
-                    desired_population_size, len(population)
-                )
+                f"Failed to create a complete "
+                f"population of size {desired_population_size}, "
+                f"only has {len(population)}"
             )
             break
         # get 2 sequences, attempt to recombine them into one, mutate it,
