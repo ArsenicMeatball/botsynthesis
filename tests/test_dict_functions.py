@@ -1,6 +1,6 @@
 import unittest
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions import *
+from src.dict_functions import *
 from Bio.Data import CodonTable
 
 

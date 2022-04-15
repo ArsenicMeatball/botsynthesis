@@ -4,7 +4,7 @@ from Bio import Restriction
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.cleaning as cleaning
+import src.cleaning as cleaning
 
 
 class Cleaning(unittest.TestCase):

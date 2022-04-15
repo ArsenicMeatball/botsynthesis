@@ -1,20 +1,13 @@
 import logging
 import multiprocessing as mp
 import pickle
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.archive import (
-    build_archive,
-)
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_func
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations import (
-    initialize_population,
-    generate_population_from_archive,
-)
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.all_algorithm_parameters import (
-    algorithm_params,
-)
 
 # /home/arsenic/.cache/JetBrains/PyCharm2020.2/snapshots/BOTS_development1.pstat
-
+from src.all_algorithm_parameters import algorithm_params
+from src.archive import build_archive
+from src.mutations import initialize_population, \
+    generate_population_from_archive
+import src.fitness_functions as fit_func
 
 def spea2_main_loop(params: dict) -> dict:
     """

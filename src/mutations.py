@@ -5,7 +5,7 @@ import uuid
 
 from Bio.Data import CodonTable
 
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.\
+import src.\
     dict_functions as dictf
 
 __SEQUENCE_KEY__ = "sequence"

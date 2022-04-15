@@ -6,10 +6,10 @@ from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
 
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations as mut
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions as dictf
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions as strf
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fitf
+import src.mutations as mut
+import src.dict_functions as dictf
+import src.string_functions as strf
+import src.fitness_functions as fitf
 
 
 # TODO finish tests

@@ -2,18 +2,9 @@ from Bio.Alphabet import IUPAC
 from Bio.Data import CodonTable
 from Bio.Seq import Seq
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2 import (
-    cleaning,
-)
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.cleaning import (
-    get_rest_enzymes_from_string,
-)
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.codon_optimization_host import (
-    determine_ideal_codon_optimized_sequence,
-)
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.set_codon_table import (
-    fetch_codon_table,
-)
+import src.cleaning as cleaning
+from src.codon_optimization_host import determine_ideal_codon_optimized_sequence
+from src.set_codon_table import fetch_codon_table
 
 valid_protein = (
     "AL*RLEGIGLN ATQACSSTVG DPKDGSVKVT FLVMISKEYP ASEMIFEKSS KDARIKVFGT "
@@ -50,7 +41,7 @@ algorithm_params = {
     "linear": True,
     "gc parameters": {"min": 0.1, "max": 0.68, "window size": 20},
     "generations": 100,
-    "restriction sites": get_rest_enzymes_from_string(restriction_sites),
+    "restriction sites": cleaning.get_rest_enzymes_from_string(restriction_sites),
     "overlapping": True,
     "locations": True,
     "repeat size": 10,

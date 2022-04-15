@@ -1,6 +1,6 @@
 import unittest
 import copy
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.archive as arch
+import src.archive as arch
 
 
 class TestArchive(unittest.TestCase):

@@ -9,23 +9,6 @@ from Bio.Restriction import Analysis, RestrictionBatch
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.density import (
-    calculate_density,
-    __DENSITY_KEY__,
-)
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.domination import (
-    calculate_raw_fitness,
-    __RAW_FITNESS_KEY__,
-)
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations as mut
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import (
-    find_num_differences,
-    get_number_of_repeats_from_repeats_dict,
-    find_repeats,
-    find_number_of_overlapping_repeats,
-    find_number_of_non_overlapping_repeats,
-    find_separated_palindromes,
-)
 
 # fitness function score name in dict
 __SCORE_HOST__ = "eval_host"
@@ -43,6 +26,12 @@ __SCORE_NAMES__ = [
     __SCORE_HAIRPINS__,
 ]
 
+from src.density import calculate_density, __DENSITY_KEY__
+from src.domination import calculate_raw_fitness, __RAW_FITNESS_KEY__
+from src.string_functions import find_num_differences, find_repeats, \
+    get_number_of_repeats_from_repeats_dict, find_number_of_overlapping_repeats, \
+    find_number_of_non_overlapping_repeats, find_separated_palindromes
+import src.mutations as mut
 
 def calculate_fitness(population: dict):
     """

@@ -1,7 +1,7 @@
 import unittest
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import *
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.all_algorithm_parameters import \
+from src.string_functions import *
+from src.all_algorithm_parameters import \
     algorithm_params
 
 

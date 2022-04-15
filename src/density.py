@@ -1,17 +1,17 @@
 from math import sqrt
 
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.dict_functions import (
+from src.dict_functions import (
     get_number_of_differences_dict_list,
     sort_dict_by_value_get_list_of_keys,
 )
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_funcs
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.list_functions import (
+import src.fitness_functions as fit_funcs
+from src.list_functions import (
     number_of_differences_between_two_lists,
 )
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.string_functions import (
+from src.string_functions import (
     find_num_differences,
 )
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.mutations as mut
+import src.mutations as mut
 
 __DENSITY_KEY__ = "density"
 

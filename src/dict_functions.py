@@ -1,4 +1,4 @@
-from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.list_functions import (
+from src.list_functions import (
     differences_between_two_lists,
 )
 
