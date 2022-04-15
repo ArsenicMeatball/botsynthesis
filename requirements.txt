@@ -1,6 +1,2 @@
 python_codon_tables
-django~=3.0.7
 biopython == 1.77
-coverage == 5.1
-selenium~=3.141.0
-mechanize~=0.4.5
