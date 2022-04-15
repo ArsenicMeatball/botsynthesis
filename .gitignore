@@ -1,5 +1,3 @@
-biobrick_optimization_tool_synthesis/optimization/sandbox
-
 # Django #
 *.log
 *.pot
@@ -118,3 +116,4 @@ GitHub.sublime-settings
 !.vscode/extensions.json
 .history
 /biobrick_optimization_tool_synthesis/optimization/codon_opt_synth_spea2/playground.py
+/playground/
