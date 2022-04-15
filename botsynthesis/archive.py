@@ -2,26 +2,26 @@ import logging
 
 
 def build_archive(
-    population: dict,
-    archive_size: int,
-    sort_key: str,
-    non_dominated_upper_limit: int = 1,
+        population: dict,
+        archive_size: int,
+        sort_key: str,
+        non_dominated_upper_limit: int = 1,
 ) -> dict:
     """
     best members of the population go into the archive
     :param archive_size: the size of the archive
     :param population: the union between the population and the "archive"
     :param sort_key: key by which to sort the population
-    :param non_dominated_upper_limit: default 1, all scores below this go into archive automatically,
+    :param non_dominated_upper_limit: default 1, all scores below this go into
+    archive automatically,
         but if size too large, some get truncated
     :return: archive dict of best members for next generation
     """
     logging.info("building archive")
     if len(population) <= archive_size:
         logging.warning(
-            "Archive >= ({0} items) than supplied population ({1} items)! returning population".format(
-                archive_size, len(population)
-            )
+            f"Archive >= ({archive_size} items) than supplied population "
+            f"({len(population)} items)! returning population"
         )
         return population
     archive = {}
@@ -38,7 +38,7 @@ def build_archive(
 
 
 def add_dominated_to_archive(
-    archive: dict, population: dict, archive_size: int, sort_key: str
+        archive: dict, population: dict, archive_size: int, sort_key: str
 ):
     """
     get best members into the archive until the right size is achieved
@@ -58,7 +58,8 @@ def add_dominated_to_archive(
         population.keys(), key=lambda x: population[x][sort_key]
     )
     # assuming minima, just add the next best one until we reach desired size
-    # also assumes that archive already contains all the dominated, though we are just adding the next best items
+    # also assumes that archive already contains all the dominated, t
+    # hough we are just adding the next best items
     while len(archive) < archive_size:
         next_item = sorted_keys[len(archive)]
         archive[next_item] = population[next_item]

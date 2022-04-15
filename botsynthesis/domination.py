@@ -9,7 +9,8 @@ __RAW_FITNESS_KEY__ = "raw fitness"
 
 def calculate_raw_fitness(population):
     """
-    Calculates strength and raw fitness values for every member of the population
+    Calculates strength and raw fitness values for every member of the
+    population
     :param population: dict of sequences and values
     :return: None, updates population
     """
@@ -56,7 +57,8 @@ def compare_two_solutions_for_dominance(
 ) -> tuple:
     """Determines if one of the points is dominated:
     Domination (for minima):
-        x dominates y, if for all coordinates, x's coordinate is smaller or equal to y's coordinate
+        x dominates y, if for all coordinates, x's coordinate is smaller or
+        equal to y's coordinate
     eg:
         (2, 10) vs (5, 6)
             2 < 5, left wins
@@ -66,7 +68,8 @@ def compare_two_solutions_for_dominance(
         (1, 2) vs (100, 1000)
             1 < 100, left wins
             2 < 1000, left wins
-        for ALL coordinates, left is smaller, therefore left dominates right as a minima
+        for ALL coordinates, left is smaller, therefore left dominates right
+        as a minima
         and would return dominated, dominates
     :param coordinates: What parameters we are checking for
     :param point_a: the first point to compare

@@ -9,7 +9,6 @@ from Bio.Restriction import Analysis, RestrictionBatch
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
 
-
 # fitness function score name in dict
 __SCORE_HOST__ = "eval_host"
 __SCORE_RESTRICTION__ = "eval_rest_sites"
@@ -28,10 +27,16 @@ __SCORE_NAMES__ = [
 
 from botsynthesis.density import calculate_density, __DENSITY_KEY__
 from botsynthesis.domination import calculate_raw_fitness, __RAW_FITNESS_KEY__
-from botsynthesis.string_functions import find_num_differences, find_repeats, \
-    get_number_of_repeats_from_repeats_dict, find_number_of_overlapping_repeats, \
-    find_number_of_non_overlapping_repeats, find_separated_palindromes
+from botsynthesis.string_functions import (
+    find_num_differences,
+    find_repeats,
+    get_number_of_repeats_from_repeats_dict,
+    find_number_of_overlapping_repeats,
+    find_number_of_non_overlapping_repeats,
+    find_separated_palindromes,
+)
 import botsynthesis.mutations as mut
+
 
 def calculate_fitness(population: dict):
     """
@@ -66,7 +71,7 @@ def eval_host(params: dict, out_q: Queue) -> None:
 
 
 def find_restriction_sites(
-    restriction_batch: RestrictionBatch, sequence: Seq, linear=True
+        restriction_batch: RestrictionBatch, sequence: Seq, linear=True
 ):
     return Analysis(
         restrictionbatch=restriction_batch, sequence=sequence, linear=linear
@@ -162,7 +167,8 @@ def eval_hairpins(params: dict, out_q: Queue) -> None:
         raise AttributeError("Loop cannot be smaller than 3 (bio rules)")
     if params["longest loop length"] > 30:
         logging.warning(
-            "loop likely to be too unstable to exist without extra features inside"
+            "loop likely to be too unstable to exist without extra features "
+            "inside "
         )
     for seq_id in params["population"].keys():
         palindrome_locations = find_separated_palindromes(
@@ -185,15 +191,16 @@ def get_windowed_gc(sequence: str, window: int) -> list:
     Gets the
     :param sequence:
     :param window:
-    :return: list of lists with idx 0 being the percent and idx 1-2 being the start-finish of the window
+    :return: list of lists with idx 0 being the percent and idx 1-2 being the
+    start-finish of the window
     """
     seq = Seq(sequence, IUPAC.unambiguous_dna)
     gc_results = list()
     for idx in range(0, len(seq)):
         sequence_window = (
-            seq[idx : idx + window]
+            seq[idx: idx + window]
             if idx + window < len(seq)
-            else seq[idx : len(seq)]
+            else seq[idx: len(seq)]
         )
         # this returns percent as 90.0 = 90% instead of 0.9
         gc_percent = GC(sequence_window)
@@ -201,7 +208,7 @@ def get_windowed_gc(sequence: str, window: int) -> list:
         gc_percent /= 100
         gc_results.append(gc_percent)
 
-        if seq[idx : len(seq)] == sequence_window:
+        if seq[idx: len(seq)] == sequence_window:
             break
     logging.debug(gc_results)
     return gc_results
@@ -210,10 +217,10 @@ def get_windowed_gc(sequence: str, window: int) -> list:
 def eval_gc(params: dict, out_q: Queue) -> None:
     out = {__SCORE_GC__: {}}
     if (
-        len(params["gc parameters"]) != 3
-        or not isinstance(params["gc parameters"]["min"], float)
-        or not isinstance(params["gc parameters"]["max"], float)
-        or not isinstance(params["gc parameters"]["window size"], int)
+            len(params["gc parameters"]) != 3
+            or not isinstance(params["gc parameters"]["min"], float)
+            or not isinstance(params["gc parameters"]["max"], float)
+            or not isinstance(params["gc parameters"]["window size"], int)
     ):
         raise AttributeError(
             "gc params should contain float low%, float high%, int window size"
@@ -243,81 +250,6 @@ def eval_gc(params: dict, out_q: Queue) -> None:
     out_q.put(out)
     return
 
-
-"""
-# are these necessary? ask the bio people
-def eval_start_sites(individual, ribosome_binding_sites, table_name="Standard"):
-    sequence = getattr(individual, "sequence")
-    codon_table = CodonTable.unambiguous_dna_by_name[table_name]
-
-    # find all start codon sites (xTG)
-    start_codon_positions = [
-        m.start()
-        for start_codon in codon_table.start_codons
-        for m in re.finditer(start_codon, str(sequence))
-    ]
-
-    # None found
-    if not len(start_codon_positions):
-        return 0
-
-    # check each start site for RBS
-    # 18 base pairs upstream of each xTG, ignore 3 bp closest to xTG
-    _rbs_offset = 18
-    rbs_positions = [
-        pos - _rbs_offset for pos in start_codon_positions if pos >= _rbs_offset
-    ]
-    mutable_seq = sequence.tomutable()
-
-    score = 0
-    for rbs_start in rbs_positions:
-        # ignore 3 bp closest to xTG
-        rbs_stop = rbs_start + _rbs_offset - 3
-        rbs_query_seq = str(mutable_seq[rbs_start:rbs_stop])
-
-        # check each unwanted RBS in each potential fragment
-        for rbs, site in ribosome_binding_sites.items():
-            search = rbs_query_seq.find(site)
-
-            count = 0  # counter to prevent infinite loop
-            while search != -1 and count < 10:
-                # mutate residues if site is found
-                codon_pos = (search + rbs_start) // 3
-                for ii in range(2):
-                    codon_idx = slice((codon_pos + ii) * 3, (codon_pos + ii + 1) * 3)
-                    score += 1
-
-                # reset sequence and search again
-                rbs_query_seq = str(mutable_seq[rbs_start: rbs_stop + 3])
-                search = rbs_query_seq.find(site)
-                count += 1
-    return score
-
-def eval_splice_sites(individual):
-    sequence = getattr(individual, "sequence")
-
-    def _pass_back_matches(list_of_sites, curr_dna):
-        dna = str(curr_dna)
-        sites = set(m for expr in list_of_sites for m in re.finditer(expr, dna))
-        try:
-            sites.remove(None)
-        except KeyError:
-            pass
-        # remove redundancy
-        sites = set((site.span(), site[0]) for site in sites)
-        codon_bounds = [
-            (s[0][0] // 3, -(-s[0][1] // 3)) for s in sorted(sites, key=lambda x: x[0])
-        ]
-        return codon_bounds
-
-    def _get_splice_sites(curr_dna):
-        # donor_sites = _pass_back_matches(splice_donors, curr_dna)
-        # acceptor_sites = _pass_back_matches(splice_acceptors, curr_dna)
-        # return set(donor_sites + acceptor_sites)
-        pass
-
-    return len(_get_splice_sites(sequence.tomutable))
-"""
 
 fitness_evals = [
     eval_host,

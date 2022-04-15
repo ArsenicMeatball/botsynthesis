@@ -5,15 +5,19 @@ import pickle
 # /home/arsenic/.cache/JetBrains/PyCharm2020.2/snapshots/BOTS_development1.pstat
 from botsynthesis.all_algorithm_parameters import algorithm_params
 from botsynthesis.archive import build_archive
-from botsynthesis.mutations import initialize_population, \
-    generate_population_from_archive
+from botsynthesis.mutations import (
+    initialize_population,
+    generate_population_from_archive,
+)
 import botsynthesis.fitness_functions as fit_func
+
 
 def spea2_main_loop(params: dict) -> dict:
     """
     Main loop of spea2 algorithm
     https://pdfs.semanticscholar.org/6672/8d01f9ebd0446ab346a855a44d2b138fd82d.pdf
-    Considered one of, if not the best Multi-objective optimization algorithm for highly dimensional problems.
+    Considered one of, if not the best Multi-objective optimization algorithm
+    for highly dimensional problems.
     :param params: dict containing everything necessary to run the program
     :return: dict containing the final archive
     """
@@ -24,7 +28,7 @@ def spea2_main_loop(params: dict) -> dict:
         params["mutation %"],
         params["codon_table"],
     )
-    archive_sequences_per_gen = {}
+    # archive_sequences_per_gen = {}
     # main loop
     is_converged = False
     out_q = mp.Queue()
@@ -68,7 +72,7 @@ def spea2_main_loop(params: dict) -> dict:
             params["num crossover sites"],
             params["mutation %"],
             params["population size"],
-            'fitness',
+            "fitness",
             params["codon_table"],
         )
         print(generation)
@@ -79,5 +83,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
     result = spea2_main_loop(algorithm_params)
     print(result)
-    with open('../playground/output.pkl', 'wb') as p:
+    with open("../playground/output.pkl", "wb") as p:
         pickle.dump(result, p)
