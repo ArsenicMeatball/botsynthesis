@@ -1,11 +1,10 @@
-
 from setuptools import setup, find_packages
 
-setup(name='BiobrickOptimizationToolSynthesis',
-      version='4.0.0',
+setup(name='botsynthesis',
+      version='4.0.1',
       author='Jean-David Rousseau',
       author_email='arsenicmeatball@yahoo.com',
-      packages=find_packages(exclude=['tests','tests.*']),
+      packages=find_packages(exclude=['tests', 'tests.*']),
       url='https://github.com/ArsenicMeatball/BOTS_development',
       scripts=[],
       license='LICENSE.md',
