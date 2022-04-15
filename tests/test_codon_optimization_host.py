@@ -3,7 +3,7 @@ import unittest
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
-from src.codon_optimization_host import *
+from botsynthesis.codon_optimization_host import *
 
 
 class COH(unittest.TestCase):

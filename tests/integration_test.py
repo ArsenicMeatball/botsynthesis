@@ -1,4 +1,4 @@
-from src.spea2_algo import spea2_main_loop
+from botsynthesis.spea2_algo import spea2_main_loop
 
 def integration_test():
     """

@@ -1,6 +1,6 @@
 import unittest
 import copy
-import src.archive as arch
+import botsynthesis.archive as arch
 
 
 class TestArchive(unittest.TestCase):

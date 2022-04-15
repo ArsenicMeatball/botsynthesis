@@ -1,7 +1,7 @@
 import unittest
 
-from src.string_functions import *
-from src.all_algorithm_parameters import \
+from botsynthesis.string_functions import *
+from botsynthesis.all_algorithm_parameters import \
     algorithm_params
 
 

@@ -4,7 +4,7 @@ from Bio import Restriction
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 
-import src.cleaning as cleaning
+import botsynthesis.cleaning as cleaning
 
 
 class Cleaning(unittest.TestCase):

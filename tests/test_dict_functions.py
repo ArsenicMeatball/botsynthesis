@@ -1,6 +1,6 @@
 import unittest
 
-from src.dict_functions import *
+from botsynthesis.dict_functions import *
 from Bio.Data import CodonTable
 
 

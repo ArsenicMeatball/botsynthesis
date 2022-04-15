@@ -6,10 +6,10 @@ from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
 
-import src.mutations as mut
-import src.dict_functions as dictf
-import src.string_functions as strf
-import src.fitness_functions as fitf
+import botsynthesis.mutations as mut
+import botsynthesis.dict_functions as dictf
+import botsynthesis.string_functions as strf
+import botsynthesis.fitness_functions as fitf
 
 
 # TODO finish tests
