@@ -86,5 +86,5 @@ def analyze(pickle_contents):
 
 
 if __name__ == "__main__":
-    with open("output.pkl", "rb") as p_:
+    with open("../playground/output.pkl", "rb") as p_:
         analyze(pickle.load(p_))

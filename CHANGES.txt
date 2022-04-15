@@ -1,0 +1,36 @@
+Major releases
+V0.1 Brian Weitzner's codon-harmony
+https://github.com/ArsenicMeatball/codon-harmony
+pros
+- handled numerous aspects of the codon deficiencies
+- solid coding practices
+cons
+- applied changes in a circular manner resulting in ever rotating improvements (removing duplicates causes gc richness, removing gc richness causes duplicates)
+- rarely worked
+- slow, only multiprocessed per sequence
+- no UI
+V1.0 initial release (Nov 2019)
+Locally ran Django application to optimize biobricks for synthesis
+https://2019.igem.org/Team:Calgary/BOT
+https://github.com/iGEMCalgary/BOTs/commit/c057d227f9905d0b6ed3b27e35d1523a0852f4ce
+Pros
+- able to, sometimes, find a sequence that would be synthesizable
+Cons
+- extremely slow
+- would result in many sequences
+- poor coding practices
+- integrated into django very poorly
+V2.0 Multiprocessed program
+processed the sequences in parallel (for speed)
+https://github.com/ArsenicMeatball/BOTS_development/commit/c19653eb32cb8ab640bc2c382145008c37dcb103
+Pros
+- able to, sometimes, find a sequence that would be synthesizable
+- most functions were solid, and tested
+Cons
+- extremely slow, too much multiprocessing
+- would result in many sequences
+- no UI
+V4.0 Packaged (WIP)
+Able to be imported into another program, no UI
+
+V5.0 integrate into IDT's scoring system

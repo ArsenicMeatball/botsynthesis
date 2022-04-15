@@ -1,4 +1,4 @@
-import biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.fitness_functions as fit_funcs
+import src.fitness_functions as fit_funcs
 
 __NEITHER_EQUAL_CASE__ = "neither"
 __DOMINATES_CASE__ = "dominates"
