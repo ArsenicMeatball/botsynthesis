@@ -1,6 +1,6 @@
 import logging
 import multiprocessing as mp
-
+import pickle
 from biobrick_optimization_tool_synthesis.optimization.codon_opt_synth_spea2.archive import (
     build_archive,
 )
@@ -85,3 +85,6 @@ def spea2_main_loop(params: dict) -> dict:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
     result = spea2_main_loop(algorithm_params)
+    print(result)
+    with open('output.pkl', 'wb') as p:
+        pickle.dump(result, p)
