@@ -1,4 +1,4 @@
-from src.list_functions import (
+from botsynthesis.list_functions import (
     differences_between_two_lists,
 )
 

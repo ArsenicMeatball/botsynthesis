@@ -3,11 +3,11 @@ import multiprocessing as mp
 import pickle
 
 # /home/arsenic/.cache/JetBrains/PyCharm2020.2/snapshots/BOTS_development1.pstat
-from src.all_algorithm_parameters import algorithm_params
-from src.archive import build_archive
-from src.mutations import initialize_population, \
+from botsynthesis.all_algorithm_parameters import algorithm_params
+from botsynthesis.archive import build_archive
+from botsynthesis.mutations import initialize_population, \
     generate_population_from_archive
-import src.fitness_functions as fit_func
+import botsynthesis.fitness_functions as fit_func
 
 def spea2_main_loop(params: dict) -> dict:
     """

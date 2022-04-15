@@ -2,9 +2,9 @@ from Bio.Alphabet import IUPAC
 from Bio.Data import CodonTable
 from Bio.Seq import Seq
 
-import src.cleaning as cleaning
-from src.codon_optimization_host import determine_ideal_codon_optimized_sequence
-from src.set_codon_table import fetch_codon_table
+import botsynthesis.cleaning as cleaning
+from botsynthesis.codon_optimization_host import determine_ideal_codon_optimized_sequence
+from botsynthesis.set_codon_table import fetch_codon_table
 
 valid_protein = (
     "AL*RLEGIGLN ATQACSSTVG DPKDGSVKVT FLVMISKEYP ASEMIFEKSS KDARIKVFGT "

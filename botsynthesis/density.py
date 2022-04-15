@@ -1,17 +1,17 @@
 from math import sqrt
 
-from src.dict_functions import (
+from botsynthesis.dict_functions import (
     get_number_of_differences_dict_list,
     sort_dict_by_value_get_list_of_keys,
 )
-import src.fitness_functions as fit_funcs
-from src.list_functions import (
+import botsynthesis.fitness_functions as fit_funcs
+from botsynthesis.list_functions import (
     number_of_differences_between_two_lists,
 )
-from src.string_functions import (
+from botsynthesis.string_functions import (
     find_num_differences,
 )
-import src.mutations as mut
+import botsynthesis.mutations as mut
 
 __DENSITY_KEY__ = "density"
 

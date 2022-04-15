@@ -1,4 +1,4 @@
-import src.fitness_functions as fit_funcs
+import botsynthesis.fitness_functions as fit_funcs
 
 __NEITHER_EQUAL_CASE__ = "neither"
 __DOMINATES_CASE__ = "dominates"

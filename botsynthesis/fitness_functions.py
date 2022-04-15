@@ -26,12 +26,12 @@ __SCORE_NAMES__ = [
     __SCORE_HAIRPINS__,
 ]
 
-from src.density import calculate_density, __DENSITY_KEY__
-from src.domination import calculate_raw_fitness, __RAW_FITNESS_KEY__
-from src.string_functions import find_num_differences, find_repeats, \
+from botsynthesis.density import calculate_density, __DENSITY_KEY__
+from botsynthesis.domination import calculate_raw_fitness, __RAW_FITNESS_KEY__
+from botsynthesis.string_functions import find_num_differences, find_repeats, \
     get_number_of_repeats_from_repeats_dict, find_number_of_overlapping_repeats, \
     find_number_of_non_overlapping_repeats, find_separated_palindromes
-import src.mutations as mut
+import botsynthesis.mutations as mut
 
 def calculate_fitness(population: dict):
     """

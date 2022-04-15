@@ -5,7 +5,7 @@ import uuid
 
 from Bio.Data import CodonTable
 
-import src.\
+import botsynthesis.\
     dict_functions as dictf
 
 __SEQUENCE_KEY__ = "sequence"
