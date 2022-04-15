@@ -79,5 +79,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
     result = spea2_main_loop(algorithm_params)
     print(result)
-    with open('output.pkl', 'wb') as p:
+    with open('../playground/output.pkl', 'wb') as p:
         pickle.dump(result, p)
