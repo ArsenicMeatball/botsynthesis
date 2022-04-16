@@ -24,10 +24,10 @@ jobs:
       - name: Lint with flake8
         run: |
           pip install flake8
-          flake8 . --ignore=E203,W503
+          flake8 botsynthesis/ --ignore=E203,W503
+          flake8 tests/ --ignore=E203,W503
       - name: Test with pytest
         run: |
           pip install pytest
           pip install pytest-cov
-#          pytest tests.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
-          pytest tests.py
+          pytest tests
