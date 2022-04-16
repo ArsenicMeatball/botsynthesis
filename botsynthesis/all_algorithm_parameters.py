@@ -1,4 +1,3 @@
-from Bio.Alphabet import IUPAC
 from Bio.Data import CodonTable
 from Bio.Seq import Seq
 
@@ -76,7 +75,7 @@ invalid_rna = valid_rna.replace("U", "=", 3)
 
 unknown = valid_dna.replace("T", "C")
 
-seq = Seq(cleaning.clean_sequence(valid_protein), IUPAC.protein)
+seq = Seq(cleaning.clean_sequence(valid_protein))
 codon_usage = fetch_codon_table()
 codon_optimized = determine_ideal_codon_optimized_sequence(seq, codon_usage)
 restriction_sites = "NdeI XhoI HpaI PstI EcoRV NcoI BamHI"

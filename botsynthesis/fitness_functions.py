@@ -4,7 +4,6 @@ from queue import Queue
 
 __FITNESS_KEY__ = "fitness"
 
-from Bio.Alphabet import IUPAC
 from Bio.Restriction import Analysis, RestrictionBatch
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
@@ -84,8 +83,7 @@ def eval_restriction_sites(params: dict, out_q: Queue) -> None:
         rest_sites = find_restriction_sites(
             params["restriction sites"],
             Seq(
-                params["population"][seq_id][mut.__SEQUENCE_KEY__],
-                IUPAC.unambiguous_dna,
+                params["population"][seq_id][mut.__SEQUENCE_KEY__]
             ),
             params["linear"],
         )
@@ -194,7 +192,7 @@ def get_windowed_gc(sequence: str, window: int) -> list:
     :return: list of lists with idx 0 being the percent and idx 1-2 being the
     start-finish of the window
     """
-    seq = Seq(sequence, IUPAC.unambiguous_dna)
+    seq = Seq(sequence)
     gc_results = list()
     for idx in range(0, len(seq)):
         sequence_window = (

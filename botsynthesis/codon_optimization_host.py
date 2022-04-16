@@ -1,5 +1,4 @@
 from Bio.Seq import Seq
-from Bio.Alphabet import IUPAC
 
 
 def determine_ideal_codon_optimized_sequence(
@@ -17,16 +16,13 @@ def determine_ideal_codon_optimized_sequence(
     """
     # requires amino acid sequence and a dict mapping amino acids to codons
 
-    if sequence.alphabet is not IUPAC.protein:
-        raise ValueError("Incorrect alphabet, must be IUPAC.protein")
-
     codon_optimized_sequence = ""
     for amino_acid in sequence:
         codon_optimized_sequence += max(
             codon_usage[amino_acid],
             key=lambda key: codon_usage[amino_acid][key],
         )
-    return Seq(codon_optimized_sequence, IUPAC.unambiguous_dna)
+    return Seq(codon_optimized_sequence)
 
 
 if __name__ == "__main__":
