@@ -5,16 +5,13 @@ import uuid
 
 from Bio.Data import CodonTable
 
-import src.\
-    dict_functions as dictf
+import botsynthesis.dict_functions as dictf
 
 __SEQUENCE_KEY__ = "sequence"
 __MAX_POPULATION_SIZE__ = 500
 
 
-def mutate_codon(
-    codon: str, codon_table: CodonTable
-):
+def mutate_codon(codon: str, codon_table: CodonTable):
     """Takes a codon and attempts to mutate it
     :param codon_table:
     :param codon:
@@ -127,7 +124,9 @@ def initialize_population(
     sequences = set()
     attempts = 0
     max_attempts = 25
-    while len(population) < desired_population_size and attempts < max_attempts:
+    while (
+        len(population) < desired_population_size and attempts < max_attempts
+    ):
         seq = mutate_seq(parent_sequence, mutation_chance, codon_table)
         if seq not in sequences:
             sequences.add(seq)
@@ -194,7 +193,8 @@ def generate_mating_pool_from_archive(
         raise ValueError(
             f"Desired mating pool size {desired_mating_pool_size} "
             f"must be greater than 1, and must be smaller than "
-            f"archive size {len(archive)}")
+            f"archive size {len(archive)}"
+        )
 
     mating_pool = {}
     while len(mating_pool) < desired_mating_pool_size:
@@ -351,8 +351,9 @@ def generate_population_from_archive(
         if mutant_child in archive_sequences_and_ids:
             # if it already exists then just add the og which
             # has a lot of information
-            population[archive_sequences_and_ids[mutant_child]] = \
-                archive_copy[archive_sequences_and_ids[mutant_child]]
+            population[archive_sequences_and_ids[mutant_child]] = archive_copy[
+                archive_sequences_and_ids[mutant_child]
+            ]
             attempts += 1
         elif mutant_child in sequences:
             # failed to create a new sequence

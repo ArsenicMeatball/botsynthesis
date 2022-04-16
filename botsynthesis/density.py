@@ -1,17 +1,17 @@
 from math import sqrt
 
-from src.dict_functions import (
+from botsynthesis.dict_functions import (
     get_number_of_differences_dict_list,
     sort_dict_by_value_get_list_of_keys,
 )
-import src.fitness_functions as fit_funcs
-from src.list_functions import (
+import botsynthesis.fitness_functions as fit_funcs
+from botsynthesis.list_functions import (
     number_of_differences_between_two_lists,
 )
-from src.string_functions import (
+from botsynthesis.string_functions import (
     find_num_differences,
 )
-import src.mutations as mut
+import botsynthesis.mutations as mut
 
 __DENSITY_KEY__ = "density"
 
@@ -19,8 +19,10 @@ __DENSITY_KEY__ = "density"
 def calculate_density(population: dict):
     """
     calculates the density of a sequence based on the kth nearest neighbour
-    D = (distance to kth nearest neighbour + 2)^-1, where k is sqrt(population + archive size)
-    :param population: dict containing all sequences in the population and the archive
+    D = (distance to kth nearest neighbour + 2)^-1,
+    where k is sqrt(population + archive size)
+    :param population: dict containing all sequences in the population
+        and the archive
     :return: None, updates population
     """
     k = round(sqrt(len(population)))
@@ -107,7 +109,8 @@ def get_total_distance(
 def get_host_distance(str1: str, str2: str) -> int:
     """
     Hamming distance
-    determine the differences between the two sequences instead of the difference with the host
+    determine the differences between the two sequences instead of the
+    difference with the host
     :argument str1 (str) the first string to compare
     :argument str2 (str) the second string to compare
     :return (int) the number of differences between strings
@@ -117,9 +120,12 @@ def get_host_distance(str1: str, str2: str) -> int:
 
 def get_restriction_distance(locations1: list, locations2: list) -> int:
     """
-    determine the differences in number of restriction sites and their locations
-    :param locations1: (list) list containing lists of locations where a restriction site occurs
-    :param locations2: (list) list containing lists of locations where a restriction site occurs
+    determine the differences in number of restriction sites and their
+    locations
+    :param locations1: (list) list containing lists of locations where a
+    restriction site occurs
+    :param locations2: (list) list containing lists of locations where a
+    restriction site occurs
     expects [[idx],[],[idx, idx, idx] ... ]
     :return: (int) the number of differences between the two lists
     """
@@ -136,10 +142,13 @@ def get_repeat_distance(
     repeat_n_locations1: dict, repeat_n_locations2: dict
 ) -> int:
     """
-    determine the differences in the repeats and their locations between the two dictionaries
+    determine the differences in the repeats and their locations between the
+    two dictionaries
     expects {'repeat_sequence':[idx, idx], 'seq':[idx] ... }
-    :param repeat_n_locations1: the sequences and the locations and the indices they are in
-    :param repeat_n_locations2: the sequences and the locations and the indices they are in
+    :param repeat_n_locations1: the sequences and the locations and
+    the indices they are in
+    :param repeat_n_locations2: the sequences and the locations and
+    the indices they are in
     :return: number of differences between the dictionaries
     """
     return get_number_of_differences_dict_list(

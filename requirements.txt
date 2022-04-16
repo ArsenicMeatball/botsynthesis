@@ -1,2 +1,4 @@
-python_codon_tables
-biopython == 1.77
+python_codon_tables == 0.1.11
+biopython == 1.79
+pytest~=7.1.1
+setuptools~=51.3.2

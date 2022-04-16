@@ -1,4 +1,4 @@
-from src.list_functions import (
+from botsynthesis.list_functions import (
     differences_between_two_lists,
 )
 
@@ -74,7 +74,8 @@ def sort_dict_by_value(d: dict) -> list:
 def invert_dict(d: dict, is_naive=False) -> dict:
     """
     reverses a dict
-    :param is_naive: True for pretending like it is a 1-1 mapping (may lose entries), False to have sets for keys with
+    :param is_naive: True for pretending like it is a 1-1 mapping
+    (may lose entries), False to have sets for keys with
         multiple mappings
     :param d: the dict to invert
     :return: inverted dict
