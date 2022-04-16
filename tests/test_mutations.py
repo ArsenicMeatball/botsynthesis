@@ -88,7 +88,7 @@
 #         mutant = mut.mutate_seq(seq1, mutation_chance, codon_table)
 #         minimum_number_of_differences = 11
 #         maximum_number_of_differences = 20
-#         actual_number_of_differences = strf.find_num_differences(seq1, mutant)
+#        actual_number_of_differences = strf.find_num_differences(seq1, mutant)
 #         self.assertGreaterEqual(
 #             actual_number_of_differences,
 #             minimum_number_of_differences,
@@ -102,7 +102,7 @@
 #         # make sure the number of differences makes sense at 0% mutation
 #         mutation_chance = 0
 #         mutant = mut.mutate_seq(seq1, mutation_chance, codon_table)
-#         actual_number_of_differences = strf.find_num_differences(seq1, mutant)
+#        actual_number_of_differences = strf.find_num_differences(seq1, mutant)
 #         self.assertEqual(
 #             actual_number_of_differences,
 #             0,
@@ -152,7 +152,8 @@
 #         self.assertEqual(
 #             len(population),
 #             desired_size,
-#             "Failed to create a population diverse enough, using a low mutation chance",
+#             "Failed to create a population diverse enough,
+#             using a low mutation chance",
 #         )
 #
 #     def test_initialize_population_fail(self):
@@ -277,7 +278,7 @@
 #         aa1 = Seq(s1, IUPAC.unambiguous_dna).translate()
 #         aa2 = Seq(s2, IUPAC.unambiguous_dna).translate()
 #         self.assertEqual(
-#             aa2, aa1, "The setup for recombine is bad, the test cannot be ran"
+#            aa2, aa1, "The setup for recombine is bad, the test cannot be ran"
 #         )
 #         for num in range(1, 20):
 #             r = mut.recombine_dna_sequence(s1, s2, num)
@@ -295,10 +296,12 @@
 #             if num > 10:
 #                 self.assertTrue(
 #                     r != s1,
-#                     "at large numbers of sites, the string should theoretically nearly never be "
+#                   "at large numbers of sites, the string shoul
+#                   d theoretically nearly never be "
 #                     "the same as the parent chance=1/11^10",
 #                 )
-#         # sending in the same sequence twice should result in the sequence being returned
+#         # sending in the same sequence t
+#         wice should result in the sequence being returned
 #         new_seq = mut.recombine_dna_sequence(s1, s1, 10)
 #         self.assertEqual(s1, new_seq, "Failed to return parent sequence")
 #
@@ -353,7 +356,8 @@
 #         for ind in population.values():
 #             if ind[seq_key] in [s1, s2, s3, s4, s5, s6]:
 #                 logging.warning(
-#                     "new population member the same as an old member - undesirable behaviour"
+#                     "new population member the same as an old member -
+#                     undesirable behaviour"
 #                 )
 #             self.assertEqual(
 #                 expected_aa,

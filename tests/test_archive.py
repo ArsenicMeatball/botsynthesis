@@ -58,7 +58,7 @@
 #                 KeyError, arch.build_archive, pop, 0, self.not_exist_sort_key
 #             )
 #             self.assertRaises(
-#                 KeyError, arch.build_archive, pop, -1, self.not_exist_sort_key
+#               KeyError, arch.build_archive, pop, -1, self.not_exist_sort_key
 #             )
 #
 #     def test_build_archive_pop5_arch_size_gt_pop(self):
@@ -164,7 +164,8 @@
 #         )
 #
 #     def test_add_dominated_to_archive_pass(self):
-#         # should add the best dominated members from the population into the archive
+#         # should add the best dominated members from the population
+#         into the archive
 #         expected = {
 #             "5": self.seq5,
 #             "6": self.seq6,
@@ -236,7 +237,7 @@
 #     def test_truncate_archive_fail(self):
 #         # archive smaller than desired size
 #         self.assertRaises(
-#             ValueError, arch.truncate_archive, {}, 10000, self.correct_sort_key
+#           ValueError, arch.truncate_archive, {}, 10000, self.correct_sort_key
 #         )
 #         # wrong key
 #         self.assertRaises(

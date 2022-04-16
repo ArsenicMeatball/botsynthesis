@@ -31,14 +31,14 @@
 #         sequence = "ACUG"
 #         actual = cleaning.determine_sequence_type(sequence)
 #         self.assertEqual(
-#             expected, actual, "failed to determine correct sequence type - RNA"
+#           expected, actual, "failed to determine correct sequence type - RNA"
 #         )
 #
 #         expected = cleaning.AA
 #         sequence = "PRTK"
 #         actual = cleaning.determine_sequence_type(sequence)
 #         self.assertEqual(
-#             expected, actual, "failed to determine correct sequence type - AA"
+#           expected, actual, "failed to determine correct sequence type - AA"
 #         )
 #
 #     def test_determine_sequence_type_fail(self):
@@ -60,7 +60,7 @@
 #         expected = "ACTGGCGTACGTCATGCATCTACACGATCG"
 #         sequence = "act ggc gt acg tca tg ca tc tac ac g at cg"
 #         actual = cleaning.clean_sequence(sequence)
-#         self.assertEqual(expected, actual, "failed to clean sequence properly")
+#       self.assertEqual(expected, actual, "failed to clean sequence properly")
 #
 #     def test_clean_sequence_fail(self):
 #         sequence = {"aaaaa": "aaaaaa", "bbbbbbb": "bbbbb"}
@@ -126,13 +126,13 @@
 #         )
 #
 #     def test_get_rest_enzymes_from_list_pass(self):
-#         input_list = ["NdeI", "XhoI", "HpaI", "PstI", "EcoRV", "NcoI", "BamHI"]
+#       input_list = ["NdeI", "XhoI", "HpaI", "PstI", "EcoRV", "NcoI", "BamHI"]
 #         expected = Restriction.RestrictionBatch(
 #             [Restriction.AllEnzymes.get(enz) for enz in input_list]
 #         )
 #         actual = cleaning.get_rest_enzymes_from_list(input_list)
 #         self.assertEqual(
-#             expected, actual, "failed to pull the correct restriction enzymes"
+#           expected, actual, "failed to pull the correct restriction enzymes"
 #         )
 #
 #     def test_get_rest_enzymes_from_list_fail(self):
@@ -156,7 +156,7 @@
 #         )
 #         actual = cleaning.get_rest_enzymes_from_string(input_list)
 #         self.assertEqual(
-#             expected, actual, "failed to pull the correct restriction enzymes"
+#           expected, actual, "failed to pull the correct restriction enzymes"
 #         )
 #
 #     def test_get_rest_enzymes_from_string_fail(self):
