@@ -15,7 +15,6 @@ def determine_ideal_codon_optimized_sequence(
         expression
     """
     # requires amino acid sequence and a dict mapping amino acids to codons
-
     codon_optimized_sequence = ""
     for amino_acid in sequence:
         codon_optimized_sequence += max(
