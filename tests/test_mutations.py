@@ -1,5 +1,3 @@
-import logging
-
 import pytest
 from Bio.Seq import Seq
 from Bio.Data import CodonTable

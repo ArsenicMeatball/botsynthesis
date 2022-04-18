@@ -1,5 +1,4 @@
 from Bio import Restriction
-from Bio.Seq import Seq
 
 
 def clean_sequence(sequence: str):

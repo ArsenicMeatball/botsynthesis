@@ -1,6 +1,8 @@
 import pytest
+from Bio.Seq import Seq
 
-from botsynthesis.codon_optimization_host import *
+from botsynthesis.codon_optimization_host import \
+    determine_ideal_codon_optimized_sequence
 
 
 def test_determine_ideal_codon_optimized_sequence_pass():
