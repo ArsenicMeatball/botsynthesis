@@ -18,6 +18,8 @@ def build_archive(
     :return: archive dict of best members for next generation
     """
     logging.info("building archive")
+    if not len(population):
+        raise ValueError("Empty population provided")
     if len(population) <= archive_size:
         logging.warning(
             f"Archive >= ({archive_size} items) than supplied population "
