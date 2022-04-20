@@ -1,4 +1,3 @@
-import botsynthesis.spea2.fitness_functions as fit_funcs
 from botsynthesis.utils.constants import NEITHER_EQUAL_CASE, SCORE_NAMES, \
     DOMINATED_CASE, DOMINATES_CASE, STRENGTH_KEY, RAW_FITNESS_KEY
 

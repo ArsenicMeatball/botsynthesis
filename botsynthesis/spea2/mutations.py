@@ -123,7 +123,7 @@ def initialize_population(
     attempts = 0
     max_attempts = 25
     while (
-            len(population) < desired_population_size and attempts < max_attempts
+        len(population) < desired_population_size and attempts < max_attempts
     ):
         seq = mutate_seq(parent_sequence, mutation_chance, codon_table)
         if seq not in sequences:

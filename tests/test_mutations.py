@@ -5,7 +5,6 @@ from Bio.Data import CodonTable
 import botsynthesis.spea2.mutations as mut
 import botsynthesis.utils.dict_functions as dictf
 import botsynthesis.utils.string_functions as strf
-import botsynthesis.spea2.fitness_functions as fitf
 
 # TODO finish tests
 from botsynthesis.utils.constants import FITNESS_KEY, SEQUENCE_KEY

@@ -1,20 +1,18 @@
 from math import sqrt
 
-from botsynthesis.utils.constants import DENSITY_KEY
+from botsynthesis.utils.constants import DENSITY_KEY, SCORE_HAIRPINS, \
+    SCORE_HOMOPOLYMERS, SCORE_GC, SCORE_REPEATS, SCORE_RESTRICTION, \
+    SEQUENCE_KEY
 from botsynthesis.utils.dict_functions import (
     get_number_of_differences_dict_list,
     sort_dict_by_value_get_list_of_keys,
 )
-import botsynthesis.spea2.fitness_functions as fit_funcs
 from botsynthesis.utils.list_functions import (
     number_of_differences_between_two_lists,
 )
 from botsynthesis.utils.string_functions import (
     find_num_differences,
 )
-import botsynthesis.spea2.mutations as mut
-
-
 
 
 def calculate_density(population: dict):
@@ -69,7 +67,7 @@ def calculate_distances_for_all_sequences(population: dict) -> dict:
 
 
 def get_total_distance(
-    seq_id1: str, values_1: dict, seq_id2: str, values_2: dict
+        seq_id1: str, values_1: dict, seq_id2: str, values_2: dict
 ) -> float:
     """
     just the sum of all the distances between 2 sequences
@@ -81,27 +79,22 @@ def get_total_distance(
     """
     total_distance = (
         get_host_distance(
-            values_1[mut.__SEQUENCE_KEY__], values_2[mut.__SEQUENCE_KEY__]
-        )
-        + get_restriction_distance(
-            values_1[fit_funcs.__SCORE_RESTRICTION__][1],
-            values_2[fit_funcs.__SCORE_RESTRICTION__][1],
-        )
-        + get_repeat_distance(
-            values_1[fit_funcs.__SCORE_REPEATS__][1],
-            values_2[fit_funcs.__SCORE_REPEATS__][1],
-        )
-        + get_gc_distance(
-            values_1[fit_funcs.__SCORE_GC__][1],
-            values_2[fit_funcs.__SCORE_GC__][1],
-        )
-        + get_homopolymers_distance(
-            values_1[fit_funcs.__SCORE_HOMOPOLYMERS__][1],
-            values_2[fit_funcs.__SCORE_HOMOPOLYMERS__][1],
-        )
-        + get_hairpin_distance(
-            values_1[fit_funcs.__SCORE_HAIRPINS__][1],
-            values_2[fit_funcs.__SCORE_HAIRPINS__][1],
+            values_1[SEQUENCE_KEY], values_2[SEQUENCE_KEY]
+        ) + get_restriction_distance(
+            values_1[SCORE_RESTRICTION][1],
+            values_2[SCORE_RESTRICTION][1],
+        ) + get_repeat_distance(
+            values_1[SCORE_REPEATS][1],
+            values_2[SCORE_REPEATS][1],
+        ) + get_gc_distance(
+            values_1[SCORE_GC][1],
+            values_2[SCORE_GC][1],
+        ) + get_homopolymers_distance(
+            values_1[SCORE_HOMOPOLYMERS][1],
+            values_2[SCORE_HOMOPOLYMERS][1],
+        ) + get_hairpin_distance(
+            values_1[SCORE_HAIRPINS][1],
+            values_2[SCORE_HAIRPINS][1],
         )
     )
     return total_distance
@@ -140,7 +133,7 @@ def get_restriction_distance(locations1: list, locations2: list) -> int:
 
 
 def get_repeat_distance(
-    repeat_n_locations1: dict, repeat_n_locations2: dict
+        repeat_n_locations1: dict, repeat_n_locations2: dict
 ) -> int:
     """
     determine the differences in the repeats and their locations between the
@@ -172,7 +165,7 @@ def get_gc_distance(percents1: list, percents2: list) -> float:
 
 
 def get_homopolymers_distance(
-    homo_n_locations1: dict, homo_n_locations2: dict
+        homo_n_locations1: dict, homo_n_locations2: dict
 ) -> int:
     """
     determine the differences between the two dictionaries
@@ -185,7 +178,7 @@ def get_homopolymers_distance(
 
 
 def get_hairpin_distance(
-    hairpin_lengths_n_locations1: dict, hairpin_lengths_n_locations2: dict
+        hairpin_lengths_n_locations1: dict, hairpin_lengths_n_locations2: dict
 ) -> int:
     """
 

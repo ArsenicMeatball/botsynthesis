@@ -9,8 +9,8 @@ from Bio.SeqUtils import GC
 from botsynthesis.spea2.density import calculate_density
 from botsynthesis.spea2.domination import calculate_raw_fitness
 from botsynthesis.utils.constants import FITNESS_KEY, DENSITY_KEY, \
-    RAW_FITNESS_KEY, SCORE_HOST, SCORE_RESTRICTION, SCORE_REPEATS, SEQUENCE_KEY, \
-    SCORE_HOMOPOLYMERS, SCORE_HAIRPINS, SCORE_GC
+    RAW_FITNESS_KEY, SCORE_HOST, SCORE_RESTRICTION, SCORE_REPEATS, \
+    SCORE_HOMOPOLYMERS, SCORE_HAIRPINS, SCORE_GC, SEQUENCE_KEY
 from botsynthesis.utils.string_functions import (
     find_num_differences,
     find_repeats,
@@ -33,8 +33,8 @@ def calculate_fitness(population: dict):
     calculate_density(population)
     for seq_id in population:
         population[seq_id][FITNESS_KEY] = (
-                population[seq_id][RAW_FITNESS_KEY]
-                + population[seq_id][DENSITY_KEY]
+            population[seq_id][RAW_FITNESS_KEY]
+            + population[seq_id][DENSITY_KEY]
         )
 
 
