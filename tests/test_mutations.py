@@ -2,13 +2,14 @@ import pytest
 from Bio.Seq import Seq
 from Bio.Data import CodonTable
 
-import botsynthesis.mutations as mut
-import botsynthesis.dict_functions as dictf
-import botsynthesis.string_functions as strf
-import botsynthesis.fitness_functions as fitf
-
+import botsynthesis.spea2.mutations as mut
+import botsynthesis.utils.dict_functions as dictf
+import botsynthesis.utils.string_functions as strf
 
 # TODO finish tests
+from botsynthesis.utils.constants import FITNESS_KEY, SEQUENCE_KEY
+
+
 @pytest.fixture()
 def codon_table():
     return CodonTable.unambiguous_dna_by_id[1]
@@ -153,7 +154,7 @@ def test_tournament_selection_without_replacement_fail():
     }
     with pytest.raises(ValueError):
         mut.tournament_selection_without_replacement(population, 1, True,
-                                                     fitf.__FITNESS_KEY__)
+                                                     FITNESS_KEY)
 
 
 def test_generate_mating_pool_from_archive_pass():
@@ -173,7 +174,7 @@ def test_generate_mating_pool_from_archive_pass():
     assert len(mating_pool) == desired_size
     assert mating_pool.items() <= archive.items()
     # default key works
-    key = fitf.__FITNESS_KEY__
+    key = FITNESS_KEY
     archive = {
         1: {key: 1},
         2: {key: 2},
@@ -191,15 +192,15 @@ def test_generate_mating_pool_from_archive_pass():
 def test_generate_mating_pool_from_archive_fail():
     # smol archive
     with pytest.raises(ValueError):
-        mut.generate_mating_pool_from_archive({}, 5, fitf.__FITNESS_KEY__)
+        mut.generate_mating_pool_from_archive({}, 5, FITNESS_KEY)
     # smol mating pool
     archive = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
     with pytest.raises(ValueError):
-        mut.generate_mating_pool_from_archive(archive, 0, fitf.__FITNESS_KEY__)
+        mut.generate_mating_pool_from_archive(archive, 0, FITNESS_KEY)
     # big mating pool
     with pytest.raises(ValueError):
         mut.generate_mating_pool_from_archive(archive, 100,
-                                              fitf.__FITNESS_KEY__)
+                                              FITNESS_KEY)
 
 
 def test_recombine_pass():
@@ -247,8 +248,8 @@ def test_generate_population_from_archive_pass(codon_table):
     num_recombination_sites = mut.get_rec_sites_for_len(
         len(s1), recomb_chance
     )
-    fit_key = fitf.__FITNESS_KEY__
-    seq_key = mut.__SEQUENCE_KEY__
+    fit_key = FITNESS_KEY
+    seq_key = SEQUENCE_KEY
     archive = {
         1: {seq_key: s1, fit_key: 0.2},
         2: {seq_key: s2, fit_key: 1.9},
@@ -264,7 +265,7 @@ def test_generate_population_from_archive_pass(codon_table):
         desired_mating_pool_size,
         num_recombination_sites,
         mutation_chance,
-        desired_population_size, fitf.__FITNESS_KEY__, codon_table
+        desired_population_size, FITNESS_KEY, codon_table
     )
     assert len(population) == desired_population_size
     for ind in population.values():

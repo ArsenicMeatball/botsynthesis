@@ -1,7 +1,7 @@
 import pytest
 from Bio import Restriction
 
-import botsynthesis.cleaning as cleaning
+import botsynthesis.utils.cleaning as cleaning
 
 
 def test_clean_sequence_pass():

@@ -1,5 +1,5 @@
 import copy
-import botsynthesis.archive as arch
+import botsynthesis.spea2.archive as arch
 import pytest
 
 

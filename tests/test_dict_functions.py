@@ -4,7 +4,7 @@ from Bio.Data import CodonTable
 
 
 # TODO: Test fail paths
-from botsynthesis.dict_functions import get_differences_dict_list, \
+from botsynthesis.utils.dict_functions import get_differences_dict_list, \
     get_number_of_differences_dict_list, find_keys_of_minimum_value, \
     sort_dict_by_value_get_list_of_keys, sort_dict_by_value, invert_dict
 

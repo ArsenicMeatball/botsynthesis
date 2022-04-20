@@ -3,13 +3,13 @@ import multiprocessing as mp
 import pickle
 
 # /home/arsenic/.cache/JetBrains/PyCharm2020.2/snapshots/BOTS_development1.pstat
-from botsynthesis.all_algorithm_parameters import algorithm_params
-from botsynthesis.archive import build_archive
-from botsynthesis.mutations import (
+from tests.all_algorithm_parameters import algorithm_params
+from botsynthesis.spea2.archive import build_archive
+from botsynthesis.spea2.mutations import (
     initialize_population,
     generate_population_from_archive,
 )
-import botsynthesis.fitness_functions as fit_func
+import botsynthesis.spea2.fitness_functions as fit_func
 
 
 def spea2_main_loop(params: dict) -> dict:
@@ -83,5 +83,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
     result = spea2_main_loop(algorithm_params)
     print(result)
-    with open("../playground/output.pkl", "wb") as p:
+    with open("../../playground/output.pkl", "wb") as p:
         pickle.dump(result, p)
