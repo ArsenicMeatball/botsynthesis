@@ -3,6 +3,7 @@ import multiprocessing as mp
 import pickle
 
 # /home/arsenic/.cache/JetBrains/PyCharm2020.2/snapshots/BOTS_development1.pstat
+from botsynthesis.utils.constants import FITNESS_KEY
 from tests.all_algorithm_parameters import algorithm_params
 from botsynthesis.spea2.archive import build_archive
 from botsynthesis.spea2.mutations import (
@@ -63,7 +64,7 @@ def spea2_main_loop(params: dict) -> dict:
         params["archive"] = build_archive(
             params["population"],
             params["archive size"],
-            fit_func.__FITNESS_KEY__,
+            FITNESS_KEY,
         )
         # generate population of next generation
         params["population"] = generate_population_from_archive(
