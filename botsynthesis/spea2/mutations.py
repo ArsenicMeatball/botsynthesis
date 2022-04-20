@@ -5,10 +5,8 @@ import uuid
 
 from Bio.Data import CodonTable
 
-import botsynthesis.dict_functions as dictf
-
-__SEQUENCE_KEY__ = "sequence"
-__MAX_POPULATION_SIZE__ = 500
+import botsynthesis.utils.dict_functions as dictf
+from botsynthesis.utils.constants import MAX_POPULATION_SIZE, SEQUENCE_KEY
 
 
 def mutate_codon(codon: str, codon_table: CodonTable):
@@ -55,9 +53,9 @@ def mutate_codon(codon: str, codon_table: CodonTable):
 
 
 def mutate_seq(
-    sequence: str,
-    mutation_chance: float,
-    codon_table: CodonTable,
+        sequence: str,
+        mutation_chance: float,
+        codon_table: CodonTable,
 ) -> str:
     """
         mutate a DNA Seq based on the mutation probability,
@@ -85,7 +83,7 @@ def mutate_seq(
     codons = []
     for idx in range(0, len(sequence), 3):
         # either add the og codon or mutated boy
-        codon = str(sequence[idx : idx + 3])
+        codon = str(sequence[idx: idx + 3])
         # random random generates random between 0 and 1,
         # if it is smaller than mutation chance, then mutate
         if random.random() < mutation_chance:
@@ -98,10 +96,10 @@ def mutate_seq(
 
 
 def initialize_population(
-    desired_population_size: int,
-    parent_sequence: str,
-    mutation_chance: float,
-    codon_table: CodonTable,
+        desired_population_size: int,
+        parent_sequence: str,
+        mutation_chance: float,
+        codon_table: CodonTable,
 ) -> dict:
     """Initialize a population based around the parent sequence
     :param desired_population_size: the desired size of the population
@@ -112,12 +110,12 @@ def initialize_population(
         {seq_id : {seq_key : actual sequence}, ...more seq ids}
     """
     if (
-        desired_population_size < 1
-        or __MAX_POPULATION_SIZE__ < desired_population_size
+            desired_population_size < 1
+            or MAX_POPULATION_SIZE < desired_population_size
     ):
         raise ValueError(
             "Desired population size {} is not within 1 and {}".format(
-                desired_population_size, __MAX_POPULATION_SIZE__
+                desired_population_size, MAX_POPULATION_SIZE
             )
         )
     population = {}
@@ -125,13 +123,13 @@ def initialize_population(
     attempts = 0
     max_attempts = 25
     while (
-        len(population) < desired_population_size and attempts < max_attempts
+            len(population) < desired_population_size and attempts < max_attempts
     ):
         seq = mutate_seq(parent_sequence, mutation_chance, codon_table)
         if seq not in sequences:
             sequences.add(seq)
             seq_id = uuid.uuid4()
-            population[seq_id] = {__SEQUENCE_KEY__: seq}
+            population[seq_id] = {SEQUENCE_KEY: seq}
         else:
             attempts += 1
             logging.debug('failed to create a "new" sequence')
@@ -139,10 +137,10 @@ def initialize_population(
 
 
 def tournament_selection_without_replacement(
-    population: dict,
-    n_ary: int,
-    minima: bool,
-    fitness_key_name: str,
+        population: dict,
+        n_ary: int,
+        minima: bool,
+        fitness_key_name: str,
 ) -> str:
     """
     Get winner of a tournament (key of winner) based on the fitness value
@@ -178,9 +176,9 @@ def tournament_selection_without_replacement(
 
 
 def generate_mating_pool_from_archive(
-    archive: dict,
-    desired_mating_pool_size: int,
-    fitness_key_name: str,
+        archive: dict,
+        desired_mating_pool_size: int,
+        fitness_key_name: str,
 ) -> dict:
     """Selects a portion of the archive to generate a mating pool
     :param fitness_key_name:
@@ -208,10 +206,10 @@ def generate_mating_pool_from_archive(
 
 
 def recombine_dna_sequence(
-    sequence1: str,
-    sequence2: str,
-    number_of_sites: int,
-    spread_between_sites: int,
+        sequence1: str,
+        sequence2: str,
+        number_of_sites: int,
+        spread_between_sites: int,
 ) -> str:
     """Recombines 2 sequences to try and create a new sequence incorporating
      portions of each
@@ -269,7 +267,7 @@ def recombine_dna_sequence(
 
 
 def get_rec_sites_for_len(
-    sequence_length: int, recombination_chance: float
+        sequence_length: int, recombination_chance: float
 ) -> int:
     if recombination_chance > 1 or recombination_chance < 0:
         raise ValueError(
@@ -282,13 +280,13 @@ def get_rec_sites_for_len(
 
 
 def generate_population_from_archive(
-    _archive: dict,
-    desired_mating_pool_size: int,
-    num_recombination_sites: int,
-    mutation_chance: float,
-    desired_population_size: int,
-    fitness_key_name: str,
-    codon_table: CodonTable,
+        _archive: dict,
+        desired_mating_pool_size: int,
+        num_recombination_sites: int,
+        mutation_chance: float,
+        desired_population_size: int,
+        fitness_key_name: str,
+        codon_table: CodonTable,
 ) -> dict:
     if desired_population_size < 1:
         raise ValueError(
@@ -301,7 +299,7 @@ def generate_population_from_archive(
     # save all ids and sequences for quick look up
     archive_sequences_and_ids = {}
     for ide, attr in _archive.items():
-        archive_sequences_and_ids[attr[__SEQUENCE_KEY__]] = ide
+        archive_sequences_and_ids[attr[SEQUENCE_KEY]] = ide
 
     # create mating pool as subset of copied archive
     mating_pool = generate_mating_pool_from_archive(
@@ -337,8 +335,8 @@ def generate_population_from_archive(
             fitness_key_name=fitness_key_name,
         )
         recombined_child = recombine_dna_sequence(
-            sequence1=mating_pool[tourney_winner_key_1][__SEQUENCE_KEY__],
-            sequence2=mating_pool[tourney_winner_key_2][__SEQUENCE_KEY__],
+            sequence1=mating_pool[tourney_winner_key_1][SEQUENCE_KEY],
+            sequence2=mating_pool[tourney_winner_key_2][SEQUENCE_KEY],
             number_of_sites=num_recombination_sites,
             spread_between_sites=3,
         )
@@ -359,6 +357,6 @@ def generate_population_from_archive(
             # failed to create a new sequence
             attempts += 1
         else:
-            population[uuid.uuid4()] = {__SEQUENCE_KEY__: mutant_child}
+            population[uuid.uuid4()] = {SEQUENCE_KEY: mutant_child}
             sequences.add(mutant_child)
     return population

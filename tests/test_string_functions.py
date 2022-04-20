@@ -1,7 +1,7 @@
 import pytest
 
-from botsynthesis.all_algorithm_parameters import algorithm_params
-from botsynthesis.string_functions import find_number_of_overlapping_repeats, \
+from tests.all_algorithm_parameters import algorithm_params
+from botsynthesis.utils.string_functions import find_number_of_overlapping_repeats, \
     find_repeats, get_number_of_repeats_from_repeats_dict, \
     find_number_of_non_overlapping_repeats, find_separated_palindromes, \
     find_num_differences

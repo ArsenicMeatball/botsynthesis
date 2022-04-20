@@ -13,6 +13,7 @@ def fetch_codon_table(organism_id=316407) -> dict:
         ('amino acid', {'codon' : ratio, ... })\
         ('A', {'GCA': 0.21, 'GCC': 0.27, 'GCG': 0.36, 'GCT': 0.16})
     :param organism_id: the id of the organism in kasuza, though e_coli
+
     will work
     :return: (dict)
     """

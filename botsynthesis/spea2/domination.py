@@ -1,10 +1,6 @@
-import botsynthesis.fitness_functions as fit_funcs
-
-__NEITHER_EQUAL_CASE__ = "neither"
-__DOMINATES_CASE__ = "dominates"
-__DOMINATED_CASE__ = "dominated"
-__STRENGTH_KEY__ = "strength"
-__RAW_FITNESS_KEY__ = "raw fitness"
+import botsynthesis.spea2.fitness_functions as fit_funcs
+from botsynthesis.utils.constants import NEITHER_EQUAL_CASE, SCORE_NAMES, \
+    DOMINATED_CASE, DOMINATES_CASE, STRENGTH_KEY, RAW_FITNESS_KEY
 
 
 def calculate_raw_fitness(population):
@@ -32,9 +28,9 @@ def find_dominated_solutions(population: dict) -> dict:
         for seq_id2 in population.keys():
             # prevent key errors
             if seq_id1 not in left_x_right:
-                left_x_right[seq_id1] = {seq_id2: __NEITHER_EQUAL_CASE__}
+                left_x_right[seq_id1] = {seq_id2: NEITHER_EQUAL_CASE}
             if seq_id2 not in left_x_right:
-                left_x_right[seq_id2] = {seq_id1: __NEITHER_EQUAL_CASE__}
+                left_x_right[seq_id2] = {seq_id1: NEITHER_EQUAL_CASE}
 
             if (seq_id1, seq_id2) not in visited:
                 left = population[seq_id1]
@@ -43,7 +39,7 @@ def find_dominated_solutions(population: dict) -> dict:
                     left_x_right[seq_id1][seq_id2],
                     left_x_right[seq_id2][seq_id1],
                 ) = compare_two_solutions_for_dominance(
-                    left, right, fit_funcs.__SCORE_NAMES__
+                    left, right, SCORE_NAMES
                 )
                 visited.add((seq_id1, seq_id2))
                 visited.add((seq_id2, seq_id1))
@@ -51,9 +47,9 @@ def find_dominated_solutions(population: dict) -> dict:
 
 
 def compare_two_solutions_for_dominance(
-    point_a: dict,
-    point_b: dict,
-    coordinates: list,
+        point_a: dict,
+        point_b: dict,
+        coordinates: list,
 ) -> tuple:
     """Determines if one of the points is dominated:
     Domination (for minima):
@@ -85,16 +81,16 @@ def compare_two_solutions_for_dominance(
             tally_b += 1
     # neither dominates
     if tally_a > 0 and tally_b > 0:
-        return __NEITHER_EQUAL_CASE__, __NEITHER_EQUAL_CASE__
+        return NEITHER_EQUAL_CASE, NEITHER_EQUAL_CASE
     # always equal case
     elif tally_a == tally_b == 0:
-        return __NEITHER_EQUAL_CASE__, __NEITHER_EQUAL_CASE__
+        return NEITHER_EQUAL_CASE, NEITHER_EQUAL_CASE
     # b dominates
     elif tally_a == 0:
-        return __DOMINATED_CASE__, __DOMINATES_CASE__
+        return DOMINATED_CASE, DOMINATES_CASE
     # a dominates
     elif tally_b == 0:
-        return __DOMINATES_CASE__, __DOMINATED_CASE__
+        return DOMINATES_CASE, DOMINATED_CASE
     raise RuntimeError("should not be able to get here")
 
 
@@ -109,9 +105,9 @@ def calculate_strength(left_x_right: dict, population: dict) -> dict:
     for seq_id1, seq2_dict in left_x_right.items():
         strength = 0
         for seq_id2 in seq2_dict.keys():
-            if left_x_right[seq_id1][seq_id2] == __DOMINATES_CASE__:
+            if left_x_right[seq_id1][seq_id2] == DOMINATES_CASE:
                 strength += 1
-        population[seq_id1][__STRENGTH_KEY__] = strength
+        population[seq_id1][STRENGTH_KEY] = strength
     return population
 
 
@@ -135,6 +131,6 @@ def parse_for_raw_fitness(left_x_right: dict, population: dict):
     for seq_id1, seq2_dict in left_x_right.items():
         raw_fitness = 0
         for seq_id2 in seq2_dict.keys():
-            if left_x_right[seq_id1][seq_id2] == __DOMINATED_CASE__:
-                raw_fitness += population[seq_id2][__STRENGTH_KEY__]
-        population[seq_id1][__RAW_FITNESS_KEY__] = raw_fitness
+            if left_x_right[seq_id1][seq_id2] == DOMINATED_CASE:
+                raw_fitness += population[seq_id2][STRENGTH_KEY]
+        population[seq_id1][RAW_FITNESS_KEY] = raw_fitness

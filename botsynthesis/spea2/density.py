@@ -1,19 +1,20 @@
 from math import sqrt
 
-from botsynthesis.dict_functions import (
+from botsynthesis.utils.constants import DENSITY_KEY
+from botsynthesis.utils.dict_functions import (
     get_number_of_differences_dict_list,
     sort_dict_by_value_get_list_of_keys,
 )
-import botsynthesis.fitness_functions as fit_funcs
-from botsynthesis.list_functions import (
+import botsynthesis.spea2.fitness_functions as fit_funcs
+from botsynthesis.utils.list_functions import (
     number_of_differences_between_two_lists,
 )
-from botsynthesis.string_functions import (
+from botsynthesis.utils.string_functions import (
     find_num_differences,
 )
-import botsynthesis.mutations as mut
+import botsynthesis.spea2.mutations as mut
 
-__DENSITY_KEY__ = "density"
+
 
 
 def calculate_density(population: dict):
@@ -29,7 +30,7 @@ def calculate_density(population: dict):
     all_distances = calculate_distances_for_all_sequences(population)
     for seq_id, neighbours in all_distances.items():
         k_nearest_neighbour = get_kth_neirest_neighbour_dict(neighbours, k)
-        population[seq_id][__DENSITY_KEY__] = pow(
+        population[seq_id][DENSITY_KEY] = pow(
             (all_distances[seq_id][k_nearest_neighbour] + 2), -1
         )
 
